@@ -1,4 +1,4 @@
-package com.qrcraft
+package com.qrcraft.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,8 +14,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.qrcraft.ui.theme.QRCraftTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             QRCraftTheme {
