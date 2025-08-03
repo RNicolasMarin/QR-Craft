@@ -1,4 +1,4 @@
-package com.qrcraft.ui.theme
+package com.qrcraft.core.presentation.designsystem
 
 import androidx.compose.ui.graphics.Color
 
