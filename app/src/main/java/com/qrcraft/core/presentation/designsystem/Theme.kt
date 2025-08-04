@@ -10,6 +10,8 @@ private val ColorScheme = lightColorScheme(
     surfaceContainerHigh = White,
     onSurface = Black,
     onSurfaceVariant = Grey2,
+    surfaceContainerHighest = White,
+    error = Red
 )
 
 @Composable

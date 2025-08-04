@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">QRCraft</string>
+    
+    <string name="camera_permission_dialog_title">Camera Required</string>
+    <string name="camera_permission_dialog_message">This app cannot function without camera access. To scan QR codes, please grant permission.</string>
+    <string name="camera_permission_dialog_close">Close App</string>
+    <string name="camera_permission_dialog_grant">Grant Access</string>
+
 </resources>

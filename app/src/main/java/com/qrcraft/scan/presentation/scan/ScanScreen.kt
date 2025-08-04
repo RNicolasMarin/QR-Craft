@@ -8,9 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.scan.presentation.util.checkCameraPermission
 import com.qrcraft.scan.presentation.util.openAppSettings
 
@@ -61,30 +61,22 @@ fun ScanScreenRoot() {
     }
 
     if (showCustomDialog) {
-        AlertDialog(
+        QRCraftDialog(
+            title = R.string.camera_permission_dialog_title,
+            text = R.string.camera_permission_dialog_message,
+            confirmButton = R.string.camera_permission_dialog_grant,
+            dismissButton = R.string.camera_permission_dialog_close,
             onDismissRequest = {
                 showCustomDialog = false
                 activity.finish()
             },
-            title = { Text("Camera Permission") },
-            text = {
-                Text("This app needs access to your camera to take pictures.")
+            onConfirmButtonClick = {
+                showCustomDialog = false
+                launcher.launch(Manifest.permission.CAMERA)
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    showCustomDialog = false
-                    launcher.launch(Manifest.permission.CAMERA)
-                }) {
-                    Text("Allow")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showCustomDialog = false
-                    activity.finish()
-                }) {
-                    Text("Deny")
-                }
+            onDismissButtonClick = {
+                showCustomDialog = false
+                activity.finish()
             }
         )
     }
