@@ -72,4 +72,12 @@ dependencies {
 
     //Navigation
     implementation(libs.androidx.navigation.compose)
+
+    //ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    //Koin
+    implementation(libs.bundles.koin)
 }

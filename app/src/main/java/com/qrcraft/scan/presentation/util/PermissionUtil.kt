@@ -8,7 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 
-fun Context.checkCameraPermission(): Boolean {
+fun Context.hasCameraPermission(): Boolean {
     return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
 }
 

@@ -11,81 +11,94 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
-import com.qrcraft.scan.presentation.util.checkCameraPermission
+import com.qrcraft.scan.presentation.scan.ScanAction.CustomDialogClosed
+import com.qrcraft.scan.presentation.scan.ScanAction.RequestPermission
+import com.qrcraft.scan.presentation.scan.ScanAction.UpdateAfterPermissionRequested
+import com.qrcraft.scan.presentation.scan.ScanAction.UpdateGrantedInitially
+import com.qrcraft.scan.presentation.scan.ScanEvent.*
+import com.qrcraft.scan.presentation.util.hasCameraPermission
 import com.qrcraft.scan.presentation.util.openAppSettings
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ScanScreenRoot() {
+fun ScanScreenRoot(
+    viewModel: ScanViewModel = koinViewModel()
+) {
     val context = LocalContext.current
     val activity = context as Activity
-
-    var showCustomDialog by remember { mutableStateOf(false) }
-    var permissionGranted by remember { mutableStateOf(context.checkCameraPermission()) }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         Log.d("QRCraft Permission", "isGranted: $isGranted")
 
-        when {
-            isGranted -> {
-                permissionGranted = true
-            }
-            ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA) -> {
-                // Just denied (user might allow next time)
-                activity.finish()
-            }
-            else -> {
-                // "Don't ask again" was selected
-                context.openAppSettings()
-            }
+        viewModel.onAction(
+            UpdateAfterPermissionRequested(
+                isGranted = isGranted,
+                canRequestAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)
+            )
+        )
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            CloseApp -> activity.finish()
+
+            RequestPermissionToSystem -> launcher.launch(Manifest.permission.CAMERA)
+
+            OpenAppSettings -> context.openAppSettings()
         }
     }
 
-
-    LaunchedEffect(Unit) {
-        Log.d("QRCraft Permission", "isGranted: $permissionGranted")
-        if (!permissionGranted) {
-            showCustomDialog = true
-        }
+    LaunchedEffect(true) {
+        viewModel.onAction(UpdateGrantedInitially(context.hasCameraPermission()))
     }
 
-    if (showCustomDialog) {
+    ScanScreen(
+        state = viewModel.state,
+        onAction = { action ->
+            viewModel.onAction(action)
+        }
+    )
+}
+
+@Composable
+fun ScanScreen(
+    state: ScanState,
+    onAction: (ScanAction) -> Unit
+) {
+
+    if (state.showPermissionDialog) {
         QRCraftDialog(
             title = R.string.camera_permission_dialog_title,
             text = R.string.camera_permission_dialog_message,
             confirmButton = R.string.camera_permission_dialog_grant,
             dismissButton = R.string.camera_permission_dialog_close,
             onDismissRequest = {
-                showCustomDialog = false
-                activity.finish()
+                onAction(CustomDialogClosed)
             },
             onConfirmButtonClick = {
-                showCustomDialog = false
-                launcher.launch(Manifest.permission.CAMERA)
+                onAction(RequestPermission)
             },
             onDismissButtonClick = {
-                showCustomDialog = false
-                activity.finish()
+                onAction(CustomDialogClosed)
             }
         )
     }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (permissionGranted) {
+        if (state.permissionGranted) {
             // ✅ Permission granted, show camera-related UI
             Text("Camera permission granted ✅")
         } else {
