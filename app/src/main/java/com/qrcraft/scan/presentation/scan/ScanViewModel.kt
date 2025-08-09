@@ -9,6 +9,7 @@ import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.CloseApp
 import com.qrcraft.scan.presentation.scan.ScanEvent.OpenAppSettings
 import com.qrcraft.scan.presentation.scan.ScanEvent.RequestPermissionToSystem
+import com.qrcraft.scan.presentation.scan.ScanEvent.ShowPermissionGrantedSnackBar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -50,10 +51,13 @@ class ScanViewModel: ViewModel() {
                     permissionGranted = action.isGranted,
                 )
 
-                if (action.isGranted) return
-
+                val event = when {
+                    action.isGranted -> ShowPermissionGrantedSnackBar
+                    action.canRequestAgain -> CloseApp
+                    else -> OpenAppSettings
+                }
                 viewModelScope.launch {
-                    eventChannel.send(if (action.canRequestAgain) CloseApp else OpenAppSettings)
+                    eventChannel.send(event)
                 }
             }
         }

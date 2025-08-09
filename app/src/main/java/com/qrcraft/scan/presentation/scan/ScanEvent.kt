@@ -8,4 +8,6 @@ sealed class ScanEvent {
 
     data object OpenAppSettings : ScanEvent()
 
+    data object ShowPermissionGrantedSnackBar : ScanEvent()
+
 }
