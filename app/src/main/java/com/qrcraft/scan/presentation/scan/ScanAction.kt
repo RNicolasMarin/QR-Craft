@@ -13,4 +13,14 @@ sealed interface ScanAction {
         val canRequestAgain: Boolean
     ): ScanAction
 
+    data object ScannerLoading: ScanAction
+
+    data object ScannerQrNotFound: ScanAction
+
+    data object ScannerRestartRunning: ScanAction
+
+    data class ScannerSuccess(
+        val qrContent: String
+    ): ScanAction
+
 }

@@ -7,6 +7,8 @@
     <string name="camera_permission_dialog_grant">Grant Access</string>
     <string name="camera_permission_snack_bar_granted">Camera permission granted</string>
     <string name="point_your_camera">Point your camera at a QR code</string>
+    <string name="scanning_loading">Loading…</string>
+    <string name="scanning_no_qr_found">No QR-codes found</string>
 
 
 

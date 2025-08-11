@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.qrcraft.app.Screen.*
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
+import com.qrcraft.scan.presentation.scan_result.ScanResultScreenRoot
 
 @Composable
 fun NavigationRoot(
@@ -17,7 +18,16 @@ fun NavigationRoot(
         startDestination = Scan
     ) {
         composable<Scan> {
-            ScanScreenRoot()
+            ScanScreenRoot(
+                onScanResultSuccess = {
+                    navController.navigate(ScanResult) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable<ScanResult> {
+            ScanResultScreenRoot()
         }
     }
 }

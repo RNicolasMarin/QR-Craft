@@ -17,14 +17,18 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -32,7 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -64,9 +68,14 @@ import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.scan.presentation.scan.ScanAction.CustomDialogClosed
 import com.qrcraft.scan.presentation.scan.ScanAction.RequestPermission
+import com.qrcraft.scan.presentation.scan.ScanAction.ScannerLoading
+import com.qrcraft.scan.presentation.scan.ScanAction.ScannerQrNotFound
+import com.qrcraft.scan.presentation.scan.ScanAction.ScannerRestartRunning
+import com.qrcraft.scan.presentation.scan.ScanAction.ScannerSuccess
 import com.qrcraft.scan.presentation.scan.ScanAction.UpdateAfterPermissionRequested
 import com.qrcraft.scan.presentation.scan.ScanAction.UpdateGrantedInitially
 import com.qrcraft.scan.presentation.scan.ScanEvent.*
+import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import com.qrcraft.scan.presentation.util.hasCameraPermission
 import com.qrcraft.scan.presentation.util.openAppSettings
 import kotlinx.coroutines.launch
@@ -75,6 +84,7 @@ import kotlin.math.min
 
 @Composable
 fun ScanScreenRoot(
+    onScanResultSuccess: () -> Unit,
     viewModel: ScanViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -117,12 +127,15 @@ fun ScanScreenRoot(
                     )
                 }
             }
+
+            GoToScanResult -> onScanResultSuccess()
         }
     }
 
     ScanScreen(
         snackBarHostState = snackBarHostState,
         state = viewModel.state,
+        isScanning = viewModel.state::isScanning,
         onAction = { action ->
             viewModel.onAction(action)
         }
@@ -133,10 +146,9 @@ fun ScanScreenRoot(
 fun ScanScreen(
     snackBarHostState: SnackbarHostState,
     state: ScanState,
+    isScanning: () -> Boolean,
     onAction: (ScanAction) -> Unit
 ) {
-    var qrContent by remember { mutableStateOf<String?>(null) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -145,10 +157,10 @@ fun ScanScreen(
         //Camera
         QRCodeScanner(
             state = state,
-            modifier = Modifier.fillMaxSize()
-        ) { scannedValue ->
-            qrContent = scannedValue
-        }
+            isScanning = isScanning,
+            modifier = Modifier.fillMaxSize(),
+            onAction = onAction
+        )
 
         //Frame, label, snackbar
         Column(
@@ -200,22 +212,51 @@ fun ScanScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             //dialog and loading
-            if (state.showPermissionDialog) {
-                QRCraftDialog(
-                    title = R.string.camera_permission_dialog_title,
-                    text = R.string.camera_permission_dialog_message,
-                    confirmButton = R.string.camera_permission_dialog_grant,
-                    dismissButton = R.string.camera_permission_dialog_close,
-                    onDismissRequest = {
-                        onAction(CustomDialogClosed)
-                    },
-                    onConfirmButtonClick = {
-                        onAction(RequestPermission)
-                    },
-                    onDismissButtonClick = {
-                        onAction(CustomDialogClosed)
+            when (state.infoToShow) {
+                REQUEST_PERMISSION -> {
+                    QRCraftDialog(
+                        title = R.string.camera_permission_dialog_title,
+                        text = R.string.camera_permission_dialog_message,
+                        confirmButton = R.string.camera_permission_dialog_grant,
+                        dismissButton = R.string.camera_permission_dialog_close,
+                        onDismissRequest = {
+                            onAction(CustomDialogClosed)
+                        },
+                        onConfirmButtonClick = {
+                            onAction(RequestPermission)
+                        },
+                        onDismissButtonClick = {
+                            onAction(CustomDialogClosed)
+                        }
+                    )
+                }
+                NONE -> {}
+
+                LOADING -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            strokeWidth = 4.dp,
+                            color = OnOverlay
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.scanning_loading),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = OnOverlay,
+                        )
                     }
-                )
+                }
+                NO_QR_FOUND -> {
+                    QRCraftDialog(
+                        title = R.string.scanning_no_qr_found,
+                        icon = R.drawable.alert_triangle
+                    ) {
+                        onAction(ScannerRestartRunning)
+                    }
+                }
             }
         }
     }
@@ -236,16 +277,21 @@ fun MyCustomSnackBarHost(
     }
 }
 
+const val scanInterval = 1000L
+
 @OptIn(ExperimentalGetImage::class)
 @Composable
 fun QRCodeScanner(
     modifier: Modifier = Modifier,
     state: ScanState,
-    onQRCodeScanned: (String) -> Unit
+    isScanning: () -> Boolean,
+    onAction: (ScanAction) -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+
+    var lastTime by remember { mutableLongStateOf(0L) }
 
     when (state.permissionGranted) {
         true -> {
@@ -259,7 +305,7 @@ fun QRCodeScanner(
                     }
 
                     val preview = Preview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
+                        it.surfaceProvider = previewView.surfaceProvider
                     }
 
                     val barcodeScanner = BarcodeScanning.getClient(
@@ -276,22 +322,43 @@ fun QRCodeScanner(
                         .build()
 
                     analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
+                        if (!isScanning()) {
+                            imageProxy.close()
+                            return@setAnalyzer
+                        }
+
+                        val now = System.currentTimeMillis()
+                        if (now - lastTime < scanInterval) {
+                            imageProxy.close()
+                            return@setAnalyzer
+                        }
+                        lastTime = now
+
                         val mediaImage = imageProxy.image
                         if (mediaImage != null) {
                             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                             barcodeScanner.process(image)
                                 .addOnSuccessListener { barcodes ->
-                                    for (barcode in barcodes) {
-                                        barcode.rawValue?.let { value ->
-                                            onQRCodeScanned(value)
-                                        }
+                                    if (barcodes.isNotEmpty()) {
+                                        onAction(ScannerLoading)
                                     }
+
+                                    barcodes.firstOrNull()?.rawValue?.let { value ->
+                                        onAction(ScannerSuccess(value))
+                                    }
+                                }
+                                .addOnCanceledListener {
+                                    onAction(ScannerQrNotFound)
+                                }
+                                .addOnFailureListener {
+                                    onAction(ScannerQrNotFound)
                                 }
                                 .addOnCompleteListener {
                                     imageProxy.close()
                                 }
                         } else {
                             imageProxy.close()
+                            onAction(ScannerQrNotFound)
                         }
                     }
 

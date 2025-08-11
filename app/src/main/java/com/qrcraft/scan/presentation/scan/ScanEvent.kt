@@ -1,13 +1,15 @@
 package com.qrcraft.scan.presentation.scan
 
-sealed class ScanEvent {
+sealed interface ScanEvent {
 
-    data object RequestPermissionToSystem : ScanEvent()
+    data object RequestPermissionToSystem : ScanEvent
 
-    data object CloseApp : ScanEvent()
+    data object CloseApp : ScanEvent
 
-    data object OpenAppSettings : ScanEvent()
+    data object OpenAppSettings : ScanEvent
 
-    data object ShowPermissionGrantedSnackBar : ScanEvent()
+    data object ShowPermissionGrantedSnackBar : ScanEvent
+
+    data object GoToScanResult : ScanEvent
 
 }

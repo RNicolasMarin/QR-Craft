@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.CloseApp
+import com.qrcraft.scan.presentation.scan.ScanEvent.GoToScanResult
 import com.qrcraft.scan.presentation.scan.ScanEvent.OpenAppSettings
 import com.qrcraft.scan.presentation.scan.ScanEvent.RequestPermissionToSystem
 import com.qrcraft.scan.presentation.scan.ScanEvent.ShowPermissionGrantedSnackBar
+import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -27,7 +30,8 @@ class ScanViewModel: ViewModel() {
             is UpdateGrantedInitially -> {
                 state = state.copy(
                     permissionGranted = action.granted,
-                    showPermissionDialog = !action.granted
+                    isScanning = action.granted,
+                    infoToShow = if (action.granted) NONE else REQUEST_PERMISSION
                 )
             }
 
@@ -39,7 +43,7 @@ class ScanViewModel: ViewModel() {
 
             RequestPermission -> {
                 state = state.copy(
-                    showPermissionDialog = false
+                    infoToShow = NONE
                 )
                 viewModelScope.launch {
                     eventChannel.send(RequestPermissionToSystem)
@@ -49,6 +53,7 @@ class ScanViewModel: ViewModel() {
             is UpdateAfterPermissionRequested -> {
                 state = state.copy(
                     permissionGranted = action.isGranted,
+                    isScanning = action.isGranted
                 )
 
                 val event = when {
@@ -59,6 +64,39 @@ class ScanViewModel: ViewModel() {
                 viewModelScope.launch {
                     eventChannel.send(event)
                 }
+            }
+
+            ScannerLoading -> {
+                if (!state.isScanning) return
+
+                state = state.copy(
+                    infoToShow = LOADING
+                )
+            }
+            ScannerQrNotFound -> {
+                state = state.copy(
+                    isScanning = false,
+                    infoToShow = NO_QR_FOUND
+                )
+            }
+            is ScannerSuccess -> {
+                state = state.copy(
+                    isScanning = false,
+                )
+                viewModelScope.launch {
+                    delay(1000)
+                    state = state.copy(
+                        infoToShow = NONE
+                    )
+                    eventChannel.send(GoToScanResult)
+                }
+            }
+
+            ScannerRestartRunning -> {
+                state = state.copy(
+                    isScanning = true,
+                    infoToShow = NONE
+                )
             }
         }
     }
