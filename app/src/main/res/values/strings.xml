@@ -6,6 +6,7 @@
     <string name="camera_permission_dialog_close">Close App</string>
     <string name="camera_permission_dialog_grant">Grant Access</string>
     <string name="camera_permission_snack_bar_granted">Camera permission granted</string>
+    <string name="point_your_camera">Point your camera at a QR code</string>
 
 
 
