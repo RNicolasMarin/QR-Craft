@@ -362,6 +362,7 @@ fun QRCodeScanner(
                         }
                     }
 
+                    cameraProviderFuture.get().unbindAll()
                     cameraProviderFuture.get().bindToLifecycle(
                         lifecycleOwner,
                         CameraSelector.DEFAULT_BACK_CAMERA,

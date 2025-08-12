@@ -80,6 +80,7 @@ class ScanViewModel: ViewModel() {
                 )
             }
             is ScannerSuccess -> {
+                if (!state.isScanning) return
                 state = state.copy(
                     isScanning = false,
                 )

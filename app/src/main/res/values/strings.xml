@@ -9,6 +9,7 @@
     <string name="point_your_camera">Point your camera at a QR code</string>
     <string name="scanning_loading">Loading…</string>
     <string name="scanning_no_qr_found">No QR-codes found</string>
+    <string name="scan_result">Scan Result</string>
 
 
 

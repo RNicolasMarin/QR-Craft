@@ -6,6 +6,7 @@ data class ScanState(
     val permissionGranted: Boolean? = null,
     val infoToShow: ScanInfoToShow = NONE,
     val isScanning: Boolean = false,
+    val content: String = ""
 )
 
 enum class ScanInfoToShow {

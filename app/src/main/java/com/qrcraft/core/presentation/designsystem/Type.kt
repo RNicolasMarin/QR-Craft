@@ -14,6 +14,13 @@ val Suse = FontFamily(
     Font(R.font.suse_medium, weight = FontWeight.Medium),
 )
 val Typography = Typography(
+    titleMedium = TextStyle(
+        fontFamily = Suse,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.sp
+    ),
     titleSmall = TextStyle(
         fontFamily = Suse,
         fontWeight = FontWeight.SemiBold,

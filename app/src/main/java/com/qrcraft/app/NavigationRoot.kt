@@ -27,7 +27,13 @@ fun NavigationRoot(
             )
         }
         composable<ScanResult> {
-            ScanResultScreenRoot()
+            ScanResultScreenRoot(
+                onBackToScan = {
+                    navController.navigate(Scan) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
