@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.qrcraft.scan.domain.QrTypeDetector
 import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.CloseApp
 import com.qrcraft.scan.presentation.scan.ScanEvent.GoToScanResult
@@ -17,7 +18,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class ScanViewModel: ViewModel() {
+class ScanViewModel(
+    private val qrTypeDetector: QrTypeDetector
+): ViewModel() {
 
     var state by mutableStateOf(ScanState())
         private set
@@ -81,6 +84,7 @@ class ScanViewModel: ViewModel() {
             }
             is ScannerSuccess -> {
                 if (!state.isScanning) return
+
                 state = state.copy(
                     isScanning = false,
                 )
@@ -89,7 +93,8 @@ class ScanViewModel: ViewModel() {
                     state = state.copy(
                         infoToShow = NONE
                     )
-                    eventChannel.send(GoToScanResult)
+                    val type = qrTypeDetector.getQrType(action.qrContent)
+                    eventChannel.send(GoToScanResult(type))
                 }
             }
 

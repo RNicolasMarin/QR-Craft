@@ -5,8 +5,7 @@ import com.qrcraft.scan.presentation.scan.ScanInfoToShow.NONE
 data class ScanState(
     val permissionGranted: Boolean? = null,
     val infoToShow: ScanInfoToShow = NONE,
-    val isScanning: Boolean = false,
-    val content: String = ""
+    val isScanning: Boolean = false
 )
 
 enum class ScanInfoToShow {

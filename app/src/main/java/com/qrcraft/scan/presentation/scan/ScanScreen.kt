@@ -128,7 +128,7 @@ fun ScanScreenRoot(
                 }
             }
 
-            GoToScanResult -> onScanResultSuccess()
+            is GoToScanResult -> onScanResultSuccess()
         }
     }
 
