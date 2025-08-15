@@ -19,20 +19,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
+import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
+import com.qrcraft.scan.presentation.scan_result.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result.ScanResultAction.*
 import com.qrcraft.scan.presentation.util.getFormattedContent
 import com.qrcraft.scan.presentation.util.getStringRes
@@ -129,6 +138,8 @@ fun ScanResultScannedContent(
     state: ScanResultState,
     modifier: Modifier = Modifier
 ) {
+    var textState by remember { mutableStateOf(TEXT_SHORT) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -155,15 +166,59 @@ fun ScanResultScannedContent(
                 else -> Modifier
             }
 
+            if (it !is Text && textState == TEXT_SHORT) {
+                textState = NOT_TEXT
+            }
+
             Text(
                 text = it.getFormattedContent(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = if (it is Text) TextAlign.Start else TextAlign.Center,
+                maxLines = textState.maxLines,
+                overflow = textState.overflow,
+                onTextLayout = { textLayoutResult ->
+                    if (textState == NOT_TEXT) return@Text
+
+                    if (textState == TEXT_SHORT && textLayoutResult.hasVisualOverflow) {
+                        textState = TEXT_TRUNCATED
+                    }
+                },
                 modifier = contentModifier
             )
+
+            textState.buttonRes?.let { res ->
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(res),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = textState.color ?: OnSurfaceDisabled,
+                        modifier = Modifier
+                            .clickable(
+                                onClick = {
+                                    textState = when(textState) {
+                                        NOT_TEXT -> NOT_TEXT
+                                        TEXT_SHORT -> TEXT_SHORT
+                                        TEXT_TRUNCATED -> TEXT_COMPLETED
+                                        TEXT_COMPLETED -> TEXT_TRUNCATED
+                                    }
+                                }
+                            )
+                    )
+                }
+            }
         }
     }
+}
+
+enum class QrTypeTextState(val maxLines: Int, val overflow: TextOverflow, val buttonRes: Int?, val color: Color?){
+    NOT_TEXT(Int.MAX_VALUE, TextOverflow.Clip, null, null),
+    TEXT_SHORT(6, TextOverflow.Ellipsis, null, null),
+    TEXT_TRUNCATED(6, TextOverflow.Ellipsis, R.string.qr_type_text_show_more, Grey2),
+    TEXT_COMPLETED(Int.MAX_VALUE, TextOverflow.Clip, R.string.qr_type_text_show_less, OnSurfaceDisabled)
 }
 
 @MultiDevicePreview
