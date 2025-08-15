@@ -8,6 +8,8 @@ sealed class Screen {
     data object Scan: Screen()
 
     @Serializable
-    data object ScanResult: Screen()
+    data class ScanResult(
+        val qrContent: String
+    ): Screen()
 
 }

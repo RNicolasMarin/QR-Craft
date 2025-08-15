@@ -18,9 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class ScanViewModel(
-    private val qrTypeDetector: QrTypeDetector
-): ViewModel() {
+class ScanViewModel: ViewModel() {
 
     var state by mutableStateOf(ScanState())
         private set
@@ -93,8 +91,7 @@ class ScanViewModel(
                     state = state.copy(
                         infoToShow = NONE
                     )
-                    val type = qrTypeDetector.getQrType(action.qrContent)
-                    eventChannel.send(GoToScanResult(type))
+                    eventChannel.send(GoToScanResult(action.qrContent))
                 }
             }
 

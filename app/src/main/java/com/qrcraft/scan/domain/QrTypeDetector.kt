@@ -7,10 +7,43 @@ class QrTypeDetector {
     fun getQrType(rawContent: String): QrType {
         return when {
             rawContent.isLink() -> Link(rawContent)
-            rawContent.isContact() -> Contact(rawContent)
+            rawContent.isContact() -> {
+                val lines = rawContent.lines()
+                val name = lines.firstOrNull { it.startsWith("FN:") }?.substringAfter("FN:")
+                val email = lines.firstOrNull { it.startsWith("EMAIL:") }?.substringAfter("EMAIL:")
+                val phone = lines.firstOrNull { it.startsWith("TEL") }?.substringAfter(":")
+                Contact(
+                    rawContent = rawContent,
+                    name = name,
+                    email = email,
+                    phone = phone
+                )
+            }
             rawContent.isPhoneNumber() -> PhoneNumber(rawContent)
             rawContent.isGeolocation() -> Geolocation(rawContent)
-            rawContent.isWifi() -> Wifi(rawContent)
+            rawContent.isWifi() -> {
+
+                val content = rawContent.removePrefix("WIFI:")
+
+                // Split by ';' and then by ':'
+                val map = content.split(';')
+                    .mapNotNull {
+                        val parts = it.split(':', limit = 2)
+                        if (parts.size == 2) parts[0] to parts[1] else null
+                    }
+                    .toMap()
+
+                val encryption = map["T"] // WPA, WPA2, WEP, nopass, etc.
+                val ssid = map["S"]       // SSID value
+                val password = map["P"]   // Password value
+
+                Wifi(
+                    rawContent = rawContent,
+                    ssid = ssid,
+                    password = password,
+                    encryption = encryption
+                )
+            }
             else -> Text(rawContent)
         }
     }

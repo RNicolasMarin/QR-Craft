@@ -11,6 +11,16 @@
     <string name="scanning_no_qr_found">No QR-codes found</string>
     <string name="scan_result">Scan Result</string>
 
+    <string name="qr_type_link">Link</string>
+    <string name="qr_type_contact">Contact</string>
+    <string name="qr_type_phone_number">Phone Number</string>
+    <string name="qr_type_geolocation">Geolocation</string>
+    <string name="qr_type_wifi">Wi-Fi</string>
+    <string name="qr_type_text">Text</string>
+    <string name="qr_type_wifi_ssid">SSID:</string>
+    <string name="qr_type_wifi_password">Password:</string>
+    <string name="qr_type_wifi_encryption">Encryption type:</string>
+
 
 
 </resources>

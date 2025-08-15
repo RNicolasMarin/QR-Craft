@@ -16,28 +16,34 @@ class QrTypeDetectorTest {
 
     @Test
     fun `is Link 1` () {
-        val content = "http://www.example.com"
+        val content = "http://www.google.com/maps"
         val result = qrTypeDetector.getQrType(content)
         assertThat(result).isEqualTo(Link(rawContent = content))
     }
 
     @Test
     fun `is Link 2` () {
-        val content = "https://www.example.com"
+        val content = "https://www.google.com/maps"
         val result = qrTypeDetector.getQrType(content)
         assertThat(result).isEqualTo(Link(rawContent = content))
     }
 
     @Test
     fun `is Contact` () {
-        val content = "BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nTEL:+123456789\nEMAIL:johndoe@example.com\nEND:VCARD"
+        val content = "BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nTEL:+1 123 456 7890\nEMAIL:john.doe1990@gmail.com\nEND:VCARD"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Contact(rawContent = content))
+        val expected = Contact(
+            rawContent = "BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nTEL:+1 123 456 7890\nEMAIL:john.doe1990@gmail.com\nEND:VCARD",
+            name = "John Doe",
+            email = "john.doe1990@gmail.com",
+            phone = "+1 123 456 7890"
+        )
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
     fun `is Phone Number starting with +` () {
-        val content = "+1 (555) 123-4567"
+        val content = "+1 123 456 7890"
         val result = qrTypeDetector.getQrType(content)
         assertThat(result).isEqualTo(PhoneNumber(rawContent = content))
     }
@@ -51,16 +57,22 @@ class QrTypeDetectorTest {
 
     @Test
     fun `is Geolocation` () {
-        val content = "37.7749, -122.4194"
+        val content = "48.85852536332933, 2.294459839289565"
         val result = qrTypeDetector.getQrType(content)
         assertThat(result).isEqualTo(Geolocation(rawContent = content))
     }
 
     @Test
     fun `is Wi-Fi` () {
-        val content = "WIFI:S:MyNetwork;T:WPA;P:mypassword;;"
+        val content = "WIFI:T:WPA2;S:wifi-5G;P:qwerty@123;;"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Wifi(rawContent = content))
+        val expected = Wifi(
+            rawContent = content,
+            ssid = "wifi-5G",
+            password = "qwerty@123",
+            encryption = "WPA2"
+        )
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
