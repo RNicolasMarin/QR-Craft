@@ -1,8 +1,13 @@
 package com.qrcraft.scan.presentation.scan_result
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +33,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +48,7 @@ import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
+import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
@@ -58,11 +69,31 @@ fun ScanResultScreenRoot(
         viewModel.onAction(SetQrContent(qrContent))
     }
 
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+
     ScanResultScreen(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
                 GoBackToScan -> onBackToScan()
+                is ShareContent -> {
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, action.qrContent)
+                    }
+                    val shareIntent = Intent.createChooser(sendIntent, "Share via")
+                    context.startActivity(shareIntent)
+
+                }
+                is CopyContent -> {
+                    clipboardManager.setText(AnnotatedString(action.qrContent))
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.scan_result_copied),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -92,6 +123,7 @@ fun ScanResultScreen(
 
         ScanResultScannedContent(
             state = state,
+            onAction = onAction,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -136,6 +168,7 @@ fun ScanResultTopBar(
 @Composable
 fun ScanResultScannedContent(
     state: ScanResultState,
+    onAction: (ScanResultAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var textState by remember { mutableStateOf(TEXT_SHORT) }
@@ -170,8 +203,10 @@ fun ScanResultScannedContent(
                 textState = NOT_TEXT
             }
 
+            val formattedContent = it.getFormattedContent()
+
             Text(
-                text = it.getFormattedContent(),
+                text = formattedContent,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = if (it is Text) TextAlign.Start else TextAlign.Center,
@@ -210,6 +245,66 @@ fun ScanResultScannedContent(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ScanResultScannedContentActionButton(
+                    modifier = Modifier.weight(1f),
+                    textRes = R.string.scan_result_share,
+                    iconRes = R.drawable.ic_share,
+                    onClick = { onAction(ShareContent(formattedContent)) }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                ScanResultScannedContentActionButton(
+                    modifier = Modifier.weight(1f),
+                    textRes = R.string.scan_result_copy,
+                    iconRes = R.drawable.ic_copy,
+                    onClick = { onAction(CopyContent(formattedContent)) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ScanResultScannedContentActionButton(
+    modifier: Modifier = Modifier,
+    @StringRes textRes: Int,
+    @DrawableRes iconRes: Int,
+    onClick: () -> Unit
+) {
+    Button(
+        shape = RoundedCornerShape(100.dp),
+        colors = ButtonDefaults.buttonColors().copy(
+            containerColor = SurfaceHigher
+        ),
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(6.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                tint = MaterialTheme.colorScheme.onSurface,
+                contentDescription = stringResource(textRes),
+                modifier = Modifier.size(16.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = stringResource(textRes),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

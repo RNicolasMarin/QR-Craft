@@ -22,6 +22,9 @@
     <string name="qr_type_wifi_encryption">Encryption type:</string>
     <string name="qr_type_text_show_more">Show more</string>
     <string name="qr_type_text_show_less">Show less</string>
+    <string name="scan_result_share">Share</string>
+    <string name="scan_result_copy">Copy</string>
+    <string name="scan_result_copied">Copied to clipboard</string>
 
 
 

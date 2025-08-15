@@ -23,7 +23,7 @@ class ScanResultViewModel(
                 )
             }
 
-            GoBackToScan -> Unit
+            GoBackToScan, is CopyContent, is ShareContent -> Unit
         }
     }
 }
