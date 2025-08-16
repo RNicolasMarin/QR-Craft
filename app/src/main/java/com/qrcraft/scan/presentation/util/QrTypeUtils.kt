@@ -1,10 +1,16 @@
 package com.qrcraft.scan.presentation.util
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import com.qrcraft.R
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 
 fun QrType.getStringRes(): Int {
     return when (this) {
@@ -35,4 +41,16 @@ fun QrType.getFormattedContent(): String {
             }
         }
     }
+}
+
+fun generateQrCode(content: String, size: Int = 512): Bitmap {
+    val bitMatrix = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, size, size)
+    val bitmap = createBitmap(size, size, Bitmap.Config.RGB_565)
+
+    for (x in 0 until size) {
+        for (y in 0 until size) {
+            bitmap[x, y] = if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
+        }
+    }
+    return bitmap
 }

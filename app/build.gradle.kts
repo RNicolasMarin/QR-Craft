@@ -90,4 +90,7 @@ dependencies {
 
     // ML Kit Barcode Scanning
     implementation(libs.barcode.scanning)
+
+    // ZXing to create QR Codes
+    implementation(libs.core)
 }

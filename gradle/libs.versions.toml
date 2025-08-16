@@ -17,6 +17,7 @@ navigationCompose = "2.9.3"
 koin = "4.1.0"
 cameraCore = "1.4.2"
 barcodeScanning = "17.3.0"
+core = "3.5.3"
 
 
 
@@ -69,7 +70,7 @@ androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", versi
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 #Scanning
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
-
+core = { module = "com.google.zxing:core", version.ref = "core" }
 
 
 [bundles]

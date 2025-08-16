@@ -5,9 +5,11 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +34,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,12 +53,14 @@ import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
+import com.qrcraft.core.presentation.designsystem.Red
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
 import com.qrcraft.scan.presentation.scan_result.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result.ScanResultAction.*
+import com.qrcraft.scan.presentation.util.generateQrCode
 import com.qrcraft.scan.presentation.util.getFormattedContent
 import com.qrcraft.scan.presentation.util.getStringRes
 import org.koin.compose.viewmodel.koinViewModel
@@ -173,98 +180,142 @@ fun ScanResultScannedContent(
 ) {
     var textState by remember { mutableStateOf(TEXT_SHORT) }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val rawContent = state.qrType?.rawContent
+    val qrBitmap = remember(rawContent) { rawContent?.let { generateQrCode(it) } }
+
+    Box(
+        contentAlignment = Alignment.TopCenter,
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp,
-                top = 20.dp
-            )
+            .fillMaxWidth()
     ) {
-        state.qrType?.let {
-            Text(
-                text = stringResource(it.getStringRes()),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(80.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            val contentModifier = when(it) {
-                is QrType.Text -> Modifier.fillMaxWidth()
-                is Link -> Modifier.background(LinkBg)
-                else -> Modifier
-            }
-
-            if (it !is Text && textState == TEXT_SHORT) {
-                textState = NOT_TEXT
-            }
-
-            val formattedContent = it.getFormattedContent()
-
-            Text(
-                text = formattedContent,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = if (it is Text) TextAlign.Start else TextAlign.Center,
-                maxLines = textState.maxLines,
-                overflow = textState.overflow,
-                onTextLayout = { textLayoutResult ->
-                    if (textState == NOT_TEXT) return@Text
-
-                    if (textState == TEXT_SHORT && textLayoutResult.hasVisualOverflow) {
-                        textState = TEXT_TRUNCATED
-                    }
-                },
-                modifier = contentModifier
-            )
-
-            textState.buttonRes?.let { res ->
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(res),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = textState.color ?: OnSurfaceDisabled,
-                        modifier = Modifier
-                            .clickable(
-                                onClick = {
-                                    textState = when(textState) {
-                                        NOT_TEXT -> NOT_TEXT
-                                        TEXT_SHORT -> TEXT_SHORT
-                                        TEXT_TRUNCATED -> TEXT_COMPLETED
-                                        TEXT_COMPLETED -> TEXT_TRUNCATED
-                                    }
-                                }
-                            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp,
+                        top = 20.dp
                     )
+            ) {
+                Spacer(modifier = Modifier.height(80.dp))
+
+                state.qrType?.let {
+                    Text(
+                        text = stringResource(it.getStringRes()),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val contentModifier = when(it) {
+                        is QrType.Text -> Modifier.fillMaxWidth()
+                        is Link -> Modifier.background(LinkBg)
+                        else -> Modifier
+                    }
+
+                    if (it !is Text && textState == TEXT_SHORT) {
+                        textState = NOT_TEXT
+                    }
+
+                    val formattedContent = it.getFormattedContent()
+
+                    Text(
+                        text = formattedContent,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = if (it is Text) TextAlign.Start else TextAlign.Center,
+                        maxLines = textState.maxLines,
+                        overflow = textState.overflow,
+                        onTextLayout = { textLayoutResult ->
+                            if (textState == NOT_TEXT) return@Text
+
+                            if (textState == TEXT_SHORT && textLayoutResult.hasVisualOverflow) {
+                                textState = TEXT_TRUNCATED
+                            }
+                        },
+                        modifier = contentModifier
+                    )
+
+                    textState.buttonRes?.let { res ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(res),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = textState.color ?: OnSurfaceDisabled,
+                                modifier = Modifier
+                                    .clickable(
+                                        onClick = {
+                                            textState = when(textState) {
+                                                NOT_TEXT -> NOT_TEXT
+                                                TEXT_SHORT -> TEXT_SHORT
+                                                TEXT_TRUNCATED -> TEXT_COMPLETED
+                                                TEXT_COMPLETED -> TEXT_TRUNCATED
+                                            }
+                                        }
+                                    )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        ScanResultScannedContentActionButton(
+                            modifier = Modifier.weight(1f),
+                            textRes = R.string.scan_result_share,
+                            iconRes = R.drawable.ic_share,
+                            onClick = { onAction(ShareContent(formattedContent)) }
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        ScanResultScannedContentActionButton(
+                            modifier = Modifier.weight(1f),
+                            textRes = R.string.scan_result_copy,
+                            iconRes = R.drawable.ic_copy,
+                            onClick = { onAction(CopyContent(formattedContent)) }
+                        )
+                    }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth()
+        qrBitmap?.let {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(160.dp)
+                    .shadow(
+                        elevation = 20.dp, // blur
+                        shape = RoundedCornerShape(16.dp),
+                        ambientColor = Color(0x1A273037), // 10% opacity (#273037)
+                        spotColor = Color(0x1A273037)     // same for spot
+                    )
+                    .background(SurfaceHigher, RoundedCornerShape(16.dp))
             ) {
-                ScanResultScannedContentActionButton(
-                    modifier = Modifier.weight(1f),
-                    textRes = R.string.scan_result_share,
-                    iconRes = R.drawable.ic_share,
-                    onClick = { onAction(ShareContent(formattedContent)) }
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                ScanResultScannedContentActionButton(
-                    modifier = Modifier.weight(1f),
-                    textRes = R.string.scan_result_copy,
-                    iconRes = R.drawable.ic_copy,
-                    onClick = { onAction(CopyContent(formattedContent)) }
+                Image(
+                    bitmap = qrBitmap.asImageBitmap(),
+                    contentDescription = "QR Code",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(160.dp)
+                        .background(Red)
                 )
             }
         }
