@@ -1,7 +1,5 @@
 package com.qrcraft.scan.presentation.scan_result
 
-import android.content.Intent
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -42,27 +40,30 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.DimensScanResultScannedContent
+import com.qrcraft.core.presentation.designsystem.DimensScanResultTopBar
 import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
-import com.qrcraft.core.presentation.designsystem.Red
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
+import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
 import com.qrcraft.scan.presentation.scan_result.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result.ScanResultAction.*
+import com.qrcraft.scan.presentation.util.copyContent
 import com.qrcraft.scan.presentation.util.generateQrCode
 import com.qrcraft.scan.presentation.util.getFormattedContent
 import com.qrcraft.scan.presentation.util.getStringRes
+import com.qrcraft.scan.presentation.util.shareContent
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -85,21 +86,10 @@ fun ScanResultScreenRoot(
             when (action) {
                 GoBackToScan -> onBackToScan()
                 is ShareContent -> {
-                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, action.qrContent)
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, "Share via")
-                    context.startActivity(shareIntent)
-
+                    context.shareContent(action.qrContent)
                 }
                 is CopyContent -> {
-                    clipboardManager.setText(AnnotatedString(action.qrContent))
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.scan_result_copied),
-                        Toast.LENGTH_LONG
-                    ).show()
+                    context.copyContent(clipboardManager, action.qrContent)
                 }
                 else -> Unit
             }
@@ -112,7 +102,8 @@ fun ScanResultScreenRoot(
 @Composable
 fun ScanResultScreen(
     state: ScanResultState,
-    onAction: (ScanResultAction) -> Unit
+    onAction: (ScanResultAction) -> Unit,
+    dimens: DimensScanResultTopBar = MaterialTheme.dimen.scanResult.topBar
 ) {
     BackHandler {
         onAction(GoBackToScan)
@@ -122,7 +113,7 @@ fun ScanResultScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.onSurface)
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp),
     ) {
         ScanResultTopBar(onAction = onAction)
 
@@ -138,7 +129,8 @@ fun ScanResultScreen(
 
 @Composable
 fun ScanResultTopBar(
-    onAction: (ScanResultAction) -> Unit
+    onAction: (ScanResultAction) -> Unit,
+    dimens: DimensScanResultTopBar = MaterialTheme.dimen.scanResult.topBar
 ) {
     Spacer(
         modifier = Modifier.height(statusBarHeight())
@@ -167,7 +159,7 @@ fun ScanResultTopBar(
             modifier = Modifier.weight(1f)
         )
         Spacer(
-            modifier = Modifier.width(24.dp)
+            modifier = Modifier.width(dimens.spaceEnd)
         )
     }
 }
@@ -176,7 +168,8 @@ fun ScanResultTopBar(
 fun ScanResultScannedContent(
     state: ScanResultState,
     onAction: (ScanResultAction) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dimens: DimensScanResultScannedContent = MaterialTheme.dimen.scanResult.scannedContent
 ) {
     var textState by remember { mutableStateOf(TEXT_SHORT) }
 
@@ -190,9 +183,9 @@ fun ScanResultScannedContent(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(480.dp)
         ) {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(dimens.qr / 2))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -206,7 +199,7 @@ fun ScanResultScannedContent(
                         top = 20.dp
                     )
             ) {
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(modifier = Modifier.height(dimens.qr / 2))
 
                 state.qrType?.let {
                     Text(
@@ -300,7 +293,7 @@ fun ScanResultScannedContent(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(160.dp)
+                    .size(dimens.qr)
                     .shadow(
                         elevation = 20.dp, // blur
                         shape = RoundedCornerShape(16.dp),
@@ -314,8 +307,7 @@ fun ScanResultScannedContent(
                     contentDescription = "QR Code",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(160.dp)
-                        .background(Red)
+                        .size(dimens.qr)
                 )
             }
         }

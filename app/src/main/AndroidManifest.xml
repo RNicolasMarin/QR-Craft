@@ -18,6 +18,7 @@
         android:name=".app.QRCraftApplication">
         <activity
             android:name=".app.MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/Theme.Starting">
             <intent-filter>
