@@ -187,11 +187,13 @@ fun ScanScreen(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                ScanFrame(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                )
+                if (state.infoToShow != LOADING) {
+                    ScanFrame(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f)
+                    )
+                }
             }
             Box(
                 modifier = Modifier
