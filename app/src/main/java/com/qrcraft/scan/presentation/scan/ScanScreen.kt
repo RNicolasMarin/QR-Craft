@@ -2,6 +2,7 @@ package com.qrcraft.scan.presentation.scan
 
 import android.Manifest
 import android.app.Activity
+import android.graphics.Bitmap
 import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -78,6 +79,7 @@ import com.qrcraft.scan.presentation.scan.ScanEvent.*
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import com.qrcraft.scan.presentation.util.hasCameraPermission
 import com.qrcraft.scan.presentation.util.openAppSettings
+import com.qrcraft.scan.presentation.util.yuvToRgb
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.min
@@ -338,8 +340,23 @@ fun QRCodeScanner(
 
                         val mediaImage = imageProxy.image
                         if (mediaImage != null) {
-                            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                            barcodeScanner.process(image)
+                            // Camera image dimensions
+                            val imageWidth = mediaImage.width
+                            val imageHeight = mediaImage.height
+
+                            // Square side (1/3 of screen height) and centered in camera image
+                            val side = imageHeight / 3
+                            val left = (imageWidth - side) / 2
+                            val top = (imageHeight - side) / 2
+
+                            // Convert MediaImage to bitmap
+                            val bitmap = mediaImage.yuvToRgb()
+
+                            // Crop center square
+                            val croppedBitmap = Bitmap.createBitmap(bitmap, left, top, side, side)
+
+                            val inputImage = InputImage.fromBitmap(croppedBitmap, 0)
+                            barcodeScanner.process(inputImage)
                                 .addOnSuccessListener { barcodes ->
                                     if (barcodes.isNotEmpty()) {
                                         onAction(ScannerLoading)
