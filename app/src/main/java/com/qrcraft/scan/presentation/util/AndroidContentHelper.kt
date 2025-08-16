@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.qrcraft.R
+import androidx.core.net.toUri
 
 fun Context.shareContent(content: String) {
     val sendIntent = Intent(Intent.ACTION_SEND).apply {
@@ -23,4 +24,9 @@ fun Context.copyContent(clipboardManager: ClipboardManager, content: String) {
         getString(R.string.scan_result_copied),
         Toast.LENGTH_LONG
     ).show()
+}
+
+fun Context.opeLink(link: String) {
+    val intent = Intent(Intent.ACTION_VIEW, link.toUri())
+    startActivity(intent)
 }

@@ -13,4 +13,8 @@ sealed interface ScanResultAction {
     data class CopyContent(
         val qrContent: String
     ): ScanResultAction
+
+    data class OpenLink(
+        val link: String
+    ): ScanResultAction
 }
