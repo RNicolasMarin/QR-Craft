@@ -9,9 +9,9 @@ class QrTypeDetector {
             rawContent.isLink() -> Link(rawContent)
             rawContent.isContact() -> {
                 val lines = rawContent.lines()
-                val name = lines.firstOrNull { it.startsWith("FN:") }?.substringAfter("FN:")
-                val email = lines.firstOrNull { it.startsWith("EMAIL:") }?.substringAfter("EMAIL:")
-                val phone = lines.firstOrNull { it.startsWith("TEL") }?.substringAfter(":")
+                val name = lines.getContentInLine("N:")?: run { lines.getContentInLine("FN:") }
+                val email = lines.getContentInLine("EMAIL:")
+                val phone = lines.getContentInLine("TEL:")
                 Contact(
                     rawContent = rawContent,
                     name = name,
@@ -19,8 +19,12 @@ class QrTypeDetector {
                     phone = phone
                 )
             }
-            rawContent.isPhoneNumber() -> PhoneNumber(rawContent)
-            rawContent.isGeolocation() -> Geolocation(rawContent)
+            rawContent.isPhoneNumber() -> {
+                PhoneNumber(rawContent.substringAfter("tel:"))
+            }
+            rawContent.isGeolocation() -> {
+                Geolocation(rawContent.substringAfter("geo:"))
+            }
             rawContent.isWifi() -> {
 
                 val content = rawContent.removePrefix("WIFI:")
@@ -49,6 +53,10 @@ class QrTypeDetector {
     }
 }
 
+fun List<String>.getContentInLine(prefix: String): String? {
+    return firstOrNull { it.startsWith(prefix) }?.substringAfter(prefix)
+}
+
 fun String.isLink(): Boolean {
     return startsWith("http://") || startsWith("https://")
 }
@@ -58,7 +66,7 @@ fun String.isContact(): Boolean {
 }
 
 fun String.isPhoneNumber(): Boolean {
-    return startsWith("+") || isAllPhoneNumberValidCharacters()
+    return startsWith("tel:") || startsWith("+") || isAllPhoneNumberValidCharacters()
 }
 
 fun String.isAllPhoneNumberValidCharacters(): Boolean {
@@ -71,7 +79,9 @@ fun String.isAllPhoneNumberValidCharacters(): Boolean {
 }
 
 fun String.isGeolocation(): Boolean {
-    val values = split(", ")
+    val coordinates = if (startsWith("geo:")) substringAfter("geo:") else this
+
+    val values = coordinates.split(",")
     if (values.size != 2) return false
 
     val latitude = values[0].toDoubleOrNull()

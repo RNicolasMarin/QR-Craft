@@ -391,7 +391,7 @@ private fun LoginScreenPreviewLink() {
     QRCraftTheme {
         ScanResultScreen(
             state = ScanResultState(
-                qrType = Link("https://www.google.com/maps")
+                qrType = Link("http://https://pl-coding.mymemberspot.io")
             ),
             onAction = {}
         )
@@ -405,10 +405,10 @@ private fun LoginScreenPreviewContact() {
         ScanResultScreen(
             state = ScanResultState(
                 qrType = Contact(
-                    rawContent = "BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nTEL:+1 123 456 7890\nEMAIL:john.doe1990@gmail.com\nEND:VCARD",
-                    name = "John Doe",
-                    email = "john.doe1990@gmail.com",
-                    phone = "+1 123 456 7890"
+                    rawContent = "BEGIN:VCARD\nVERSION:3.0\nN:Olivia Schmidt\nTEL:+1 (555) 284-7390\nEMAIL:olivia.schmidt@example.com\nEND:VCARD",
+                    name = "Olivia Schmidt",
+                    email = "olivia.schmidt@example.com",
+                    phone = "+1 (555) 284-7390"
                 )
             ),
             onAction = {}
@@ -423,7 +423,7 @@ private fun LoginScreenPreviewPhoneNumber() {
         ScanResultScreen(
             state = ScanResultState(
                 qrType = PhoneNumber(
-                    rawContent = "+1 123 456 7890",
+                    rawContent = "+49 170 1234567",
                 )
             ),
             onAction = {}
@@ -438,7 +438,7 @@ private fun LoginScreenPreviewGeolocation() {
         ScanResultScreen(
             state = ScanResultState(
                 qrType = Geolocation(
-                    rawContent = "48.85852536332933, 2.294459839289565",
+                    rawContent = "50.4501,30.5234",
                 )
             ),
             onAction = {}
@@ -453,10 +453,10 @@ private fun LoginScreenPreviewWifi() {
         ScanResultScreen(
             state = ScanResultState(
                 qrType = Wifi(
-                    rawContent = "WIFI:T:WPA2;S:wifi-5G;P:qwerty@123;;",
-                    ssid = "wifi-5G",
-                    password = "qwerty@123",
-                    encryption = "WPA2"
+                    rawContent = "WIFI:S:DevHub_WiFi;T:WPA;P:QrCraft2025;H:false;;",
+                    ssid = "DevHub_WiFi",
+                    password = "QrCraft2025",
+                    encryption = "WPA"
                 )
             ),
             onAction = {}
