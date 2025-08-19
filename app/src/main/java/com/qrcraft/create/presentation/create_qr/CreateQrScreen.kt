@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -114,39 +116,45 @@ fun RowScope.CreateQrScreenGridCell(
     item: QrTypeUI,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceHigher),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = modifier
             .weight(1f)
-            .background(SurfaceHigher, RoundedCornerShape(16.dp))
-            .padding(vertical = 20.dp, horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-        Box(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .size(32.dp)
-                .background(item.iconBackColor, RoundedCornerShape(100.dp))
-                .padding(8.dp)
+                .padding(vertical = 20.dp, horizontal = 16.dp)
         ) {
-            Icon(
-                painter = painterResource(id = item.iconRes),
-                tint = item.iconColor,
-                contentDescription = stringResource(item.textRes),
+            Box(
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(32.dp)
+                    .background(item.iconBackColor, RoundedCornerShape(100.dp))
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = item.iconRes),
+                    tint = item.iconColor,
+                    contentDescription = stringResource(item.textRes),
+                    modifier = Modifier
+                        .size(16.dp)
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(item.textRes),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
-
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = stringResource(item.textRes),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
