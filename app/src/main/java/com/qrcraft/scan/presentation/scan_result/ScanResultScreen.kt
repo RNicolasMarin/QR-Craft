@@ -46,8 +46,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.designsystem.DimensScanResultScannedContent
-import com.qrcraft.core.presentation.designsystem.DimensScanResultTopBar
+import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
@@ -56,7 +57,6 @@ import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
-import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
 import com.qrcraft.scan.presentation.scan_result.QrTypeTextState.*
@@ -109,7 +109,7 @@ fun ScanResultScreenRoot(
 fun ScanResultScreen(
     state: ScanResultState,
     onAction: (ScanResultAction) -> Unit,
-    dimens: DimensScanResultTopBar = MaterialTheme.dimen.scanResult.topBar
+    dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
     BackHandler {
         onAction(GoBackToScan)
@@ -124,7 +124,11 @@ fun ScanResultScreen(
             .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp)
             .verticalScroll(scrollState),
     ) {
-        ScanResultTopBar(onAction = onAction)
+        QRCraftTopBar(
+            color = OnOverlay,
+            titleRes = R.string.scan_result,
+            onBackClicked = { onAction(GoBackToScan) }
+        )
 
         Spacer(modifier = Modifier.height(44.dp))
 
@@ -132,43 +136,6 @@ fun ScanResultScreen(
             state = state,
             onAction = onAction,
             modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-fun ScanResultTopBar(
-    onAction: (ScanResultAction) -> Unit,
-    dimens: DimensScanResultTopBar = MaterialTheme.dimen.scanResult.topBar
-) {
-    Spacer(
-        modifier = Modifier.height(statusBarHeight())
-    )
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(vertical = 16.dp)
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.arrow_left),
-            tint = OnOverlay,
-            contentDescription = "Back",
-            modifier = Modifier
-                .size(24.dp)
-                .clickable(onClick = { onAction(GoBackToScan) })
-        )
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-        Text(
-            text = stringResource(R.string.scan_result),
-            style = MaterialTheme.typography.titleMedium,
-            color = OnOverlay,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(
-            modifier = Modifier.width(dimens.spaceEnd)
         )
     }
 }

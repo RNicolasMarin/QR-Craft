@@ -4,15 +4,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class Dimens(
-    val scanResult: DimensScanResult
+    val scanResult: DimensScanResult,
+    val topBar: DimensTopBar,
 )
 
 data class DimensScanResult(
-    val topBar: DimensScanResultTopBar,
     val scannedContent: DimensScanResultScannedContent
 )
 
-data class DimensScanResultTopBar(
+data class DimensTopBar(
     val paddingStart: Dp,
     val paddingEnd: Dp,
     val spaceEnd: Dp
@@ -27,12 +27,12 @@ data class DimensScanResultScannedContent(
 )
 
 val dimensMobile = Dimens(
+    topBar = DimensTopBar(
+        paddingStart = 16.dp,
+        paddingEnd = 16.dp,
+        spaceEnd = 24.dp
+    ),
     scanResult = DimensScanResult(
-        topBar = DimensScanResultTopBar(
-            paddingStart = 16.dp,
-            paddingEnd = 16.dp,
-            spaceEnd = 24.dp
-        ),
         scannedContent = DimensScanResultScannedContent(
             qr = 160.dp,
             paddingStart = 16.dp,
@@ -44,12 +44,12 @@ val dimensMobile = Dimens(
 )
 
 val dimensWider = Dimens(
+    topBar = DimensTopBar(
+        paddingStart = 24.dp,
+        paddingEnd = 24.dp,
+        spaceEnd = 32.dp
+    ),
     scanResult = DimensScanResult(
-        topBar = DimensScanResultTopBar(
-            paddingStart = 24.dp,
-            paddingEnd = 24.dp,
-            spaceEnd = 32.dp
-        ),
         scannedContent = DimensScanResultScannedContent(
             qr = 200.dp,
             paddingStart = 24.dp,
