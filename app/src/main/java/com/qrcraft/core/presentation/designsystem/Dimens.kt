@@ -5,11 +5,16 @@ import androidx.compose.ui.unit.dp
 
 data class Dimens(
     val scanResult: DimensScanResult,
+    val createQr: DimensCreateQr,
     val topBar: DimensTopBar,
 )
 
 data class DimensScanResult(
     val scannedContent: DimensScanResultScannedContent
+)
+
+data class DimensCreateQr(
+    val columnsAmount: Int
 )
 
 data class DimensTopBar(
@@ -40,6 +45,9 @@ val dimensMobile = Dimens(
             paddingTop = 20.dp,
             paddingBottom = 16.dp
         )
+    ),
+    createQr = DimensCreateQr(
+        columnsAmount = 2
     )
 )
 
@@ -57,5 +65,8 @@ val dimensWider = Dimens(
             paddingTop = 24.dp,
             paddingBottom = 24.dp
         )
+    ),
+    createQr = DimensCreateQr(
+        columnsAmount = 3
     )
 )
