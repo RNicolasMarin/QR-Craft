@@ -63,6 +63,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
@@ -197,17 +198,36 @@ fun ScanScreen(
                     )
                 }
             }
-            Box(
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                MyCustomSnackBarHost(
-                    hostState = snackBarHostState,
+                Spacer(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 96.dp)
+                        .weight(1f)
                 )
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    MyCustomSnackBarHost(
+                        hostState = snackBarHostState,
+                        modifier = Modifier
+                    )
+                }
+
+                Box(
+                    contentAlignment = Alignment.TopCenter,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    QRCraftBottomNavigationBar()
+                }
             }
         }
 
