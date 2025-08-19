@@ -15,4 +15,9 @@ sealed class Screen {
     @Serializable
     data object CreateQR: Screen()
 
+    @Serializable
+    data class DataEntry(
+        val qrTypeOrdinal: Int
+    ): Screen()
+
 }

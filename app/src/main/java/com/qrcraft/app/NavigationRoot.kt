@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.qrcraft.app.Screen.*
 import com.qrcraft.create.presentation.create_qr.CreateQrScreenRoot
+import com.qrcraft.create.presentation.data_entry.DataEntryScreenRoot
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
 import com.qrcraft.scan.presentation.scan_result.ScanResultScreenRoot
 
@@ -46,7 +47,17 @@ fun NavigationRoot(
         }
         composable<CreateQR> {
             CreateQrScreenRoot(
-
+                onDataEntry = { qrTypeOrdinal ->
+                    navController.navigate(DataEntry(qrTypeOrdinal)) {
+                        //popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable<DataEntry> {
+            val args = it.toRoute<DataEntry>()
+            DataEntryScreenRoot(
+                qrTypeOrdinal = args.qrTypeOrdinal,
             )
         }
     }

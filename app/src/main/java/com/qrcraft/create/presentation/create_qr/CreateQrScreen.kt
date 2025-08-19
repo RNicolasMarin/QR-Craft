@@ -1,6 +1,7 @@
 package com.qrcraft.create.presentation.create_qr
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,14 +40,26 @@ import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.create.presentation.create_qr.CreateQrAction.OnDataEntry
 
 @Composable
-fun CreateQrScreenRoot() {
-    CreateQrScreen()
+fun CreateQrScreenRoot(
+    onDataEntry: (Int) -> Unit,
+) {
+    CreateQrScreen(
+        onAction = { action ->
+            when (action) {
+                is OnDataEntry -> {
+                    onDataEntry(action.qrTypeOrdinal)
+                }
+            }
+        }
+    )
 }
 
 @Composable
 fun CreateQrScreen(
+    onAction: (CreateQrAction) -> Unit,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
 
@@ -69,7 +82,9 @@ fun CreateQrScreen(
                 color = MaterialTheme.colorScheme.onSurface,
                 titleRes = R.string.create_qr_title,
             )
-            CreateQrScreenGrid()
+            CreateQrScreenGrid(
+                onAction = onAction
+            )
         }
 
         Box(
@@ -88,6 +103,7 @@ fun CreateQrScreen(
 
 @Composable
 fun CreateQrScreenGrid(
+    onAction: (CreateQrAction) -> Unit,
     modifier: Modifier = Modifier,
     dimens: DimensCreateQr = MaterialTheme.dimen.createQr
 ) {
@@ -103,7 +119,10 @@ fun CreateQrScreenGrid(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowItems.forEach { item ->
-                    CreateQrScreenGridCell(item = item)
+                    CreateQrScreenGridCell(
+                        item = item,
+                        onAction = onAction
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -114,6 +133,7 @@ fun CreateQrScreenGrid(
 @Composable
 fun RowScope.CreateQrScreenGridCell(
     item: QrTypeUI,
+    onAction: (CreateQrAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -122,6 +142,9 @@ fun RowScope.CreateQrScreenGridCell(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = modifier
             .weight(1f)
+            .clickable(onClick = {
+                onAction(OnDataEntry(item.ordinal))
+            })
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -162,6 +185,8 @@ fun RowScope.CreateQrScreenGridCell(
 @Composable
 private fun CreateQrScreenPreview() {
     QRCraftTheme {
-        CreateQrScreen()
+        CreateQrScreen(
+            onAction = {}
+        )
     }
 }
