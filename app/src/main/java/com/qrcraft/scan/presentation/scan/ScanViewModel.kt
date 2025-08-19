@@ -101,6 +101,8 @@ class ScanViewModel: ViewModel() {
                     infoToShow = NONE
                 )
             }
+
+            OnCreateQr -> Unit
         }
     }
 

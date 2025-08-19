@@ -69,6 +69,7 @@ import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.scan.presentation.scan.ScanAction.CustomDialogClosed
+import com.qrcraft.scan.presentation.scan.ScanAction.OnCreateQr
 import com.qrcraft.scan.presentation.scan.ScanAction.RequestPermission
 import com.qrcraft.scan.presentation.scan.ScanAction.ScannerLoading
 import com.qrcraft.scan.presentation.scan.ScanAction.ScannerQrNotFound
@@ -88,6 +89,7 @@ import kotlin.math.min
 @Composable
 fun ScanScreenRoot(
     onScanResultSuccess: (String) -> Unit,
+    onCreateQr: () -> Unit,
     viewModel: ScanViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -140,6 +142,10 @@ fun ScanScreenRoot(
         state = viewModel.state,
         isScanning = viewModel.state::isScanning,
         onAction = { action ->
+            when (action) {
+                OnCreateQr -> onCreateQr()
+                else -> Unit
+            }
             viewModel.onAction(action)
         }
     )
@@ -226,7 +232,9 @@ fun ScanScreen(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    QRCraftBottomNavigationBar()
+                    QRCraftBottomNavigationBar(
+                        onCreate = { onAction(OnCreateQr) }
+                    )
                 }
             }
         }

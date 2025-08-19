@@ -23,4 +23,6 @@ sealed interface ScanAction {
         val qrContent: String
     ): ScanAction
 
+    data object OnCreateQr: ScanAction
+
 }

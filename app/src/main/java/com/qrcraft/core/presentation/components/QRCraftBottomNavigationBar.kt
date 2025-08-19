@@ -19,12 +19,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 
 @Composable
 fun QRCraftBottomNavigationBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isOnHistory: Boolean = false,
+    isOnCreating: Boolean = false,
+    onCreate: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -39,14 +43,18 @@ fun QRCraftBottomNavigationBar(
         ) {
             QRCraftBottomNavigationBarSecondaryButton(
                 iconRes = R.drawable.ic_history,
-                contentDescription = "History"
+                contentDescription = "History",
+                isHighlighting = isOnHistory,
+                onClick = {}
             )
 
             Spacer(modifier = Modifier.width(72.dp))
 
             QRCraftBottomNavigationBarSecondaryButton(
                 iconRes = R.drawable.ic_create,
-                contentDescription = "Create"
+                contentDescription = "Create",
+                isHighlighting = isOnCreating,
+                onClick = onCreate
             )
         }
         IconButton(
@@ -70,13 +78,15 @@ fun QRCraftBottomNavigationBar(
 fun QRCraftBottomNavigationBarSecondaryButton(
     @DrawableRes iconRes: Int,
     contentDescription: String,
+    onClick: () -> Unit,
+    isHighlighting: Boolean,
     modifier: Modifier = Modifier
 ) {
     IconButton(
-        onClick = {},
+        onClick = onClick,
         modifier = modifier
             .size(44.dp)
-            //.background(Red)
+            .background(if (isHighlighting) LinkBg else SurfaceHigher, RoundedCornerShape(44.dp))
     ) {
         Icon(
             painter = painterResource(id = iconRes),
@@ -92,6 +102,10 @@ fun QRCraftBottomNavigationBarSecondaryButton(
 @Composable
 private fun QRCraftBottomNavigationBarPreview() {
     QRCraftTheme {
-        QRCraftBottomNavigationBar()
+        QRCraftBottomNavigationBar(
+            isOnHistory = true,
+            isOnCreating = true,
+            onCreate = {}
+        )
     }
 }

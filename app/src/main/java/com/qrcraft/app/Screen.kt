@@ -12,4 +12,7 @@ sealed class Screen {
         val qrContent: String
     ): Screen()
 
+    @Serializable
+    data object CreateQR: Screen()
+
 }

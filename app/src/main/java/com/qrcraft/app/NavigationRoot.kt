@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.qrcraft.app.Screen.*
+import com.qrcraft.create.presentation.create_qr.CreateQrScreenRoot
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
 import com.qrcraft.scan.presentation.scan_result.ScanResultScreenRoot
 
@@ -24,6 +25,11 @@ fun NavigationRoot(
                     navController.navigate(ScanResult(qrContent)) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onCreateQr = {
+                    navController.navigate(CreateQR) {
+
+                    }
                 }
             )
         }
@@ -36,6 +42,11 @@ fun NavigationRoot(
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable<CreateQR> {
+            CreateQrScreenRoot(
+
             )
         }
     }
