@@ -58,6 +58,9 @@ fun NavigationRoot(
             val args = it.toRoute<DataEntry>()
             DataEntryScreenRoot(
                 qrTypeOrdinal = args.qrTypeOrdinal,
+                onBackToCreateQr = {
+                    navController.popBackStack()
+                }
             )
         }
     }
