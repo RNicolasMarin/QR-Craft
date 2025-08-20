@@ -133,7 +133,7 @@ fun DataEntryScreenContent(
                 disabledContentColor = OnSurfaceDisabled
             ),
             contentPadding = PaddingValues(12.dp),
-            enabled = true,
+            enabled = state.canGenerate,
             onClick = {}
         ) {
             Text(

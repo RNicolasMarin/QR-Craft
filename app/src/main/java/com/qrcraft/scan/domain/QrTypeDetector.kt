@@ -29,7 +29,7 @@ fun List<String>.getContentInLine(prefix: String): String? {
 }
 
 fun String.tryToGetLink(): Link? {
-    val isValid = startsWith("http://") || startsWith("https://")
+    val isValid = isLink()
     return if (isValid) Link(this) else null
 }
 
@@ -51,14 +51,16 @@ fun String.tryToGetContact(): Contact? {
 }
 
 fun String.tryToGetPhoneNumber(): PhoneNumber? {
-    val isValid = startsWith("tel:") || startsWith("+") || isAllPhoneNumberValidCharacters()
+    val isValid = isPhoneNumber()
     if (!isValid) return null
 
     return PhoneNumber(substringAfter("tel:"))
 }
 
 fun String.isAllPhoneNumberValidCharacters(): Boolean {
-    return all { it ->
+    val number = if (startsWith("+")) substringAfter("+") else this
+
+    return number.all { it ->
         val isSpace = it == ' '
         val isParenthesis = it == '(' || it == ')'
         val isDash = it == '—' || it == '–' || it == '-'
@@ -69,20 +71,15 @@ fun String.isAllPhoneNumberValidCharacters(): Boolean {
 fun String.tryToGetGeolocation(): Geolocation? {
     val coordinates = if (startsWith("geo:")) substringAfter("geo:") else this
 
-    var values = coordinates.split(",")
+    var values = coordinates.split(", ")
     if (values.size == 1) {
-        values = coordinates.split(", ")
+        values = coordinates.split(",")
     }
     if (values.size != 2) return null
 
-    val latitude = values[0].toDoubleOrNull()
-    val longitude = values[1].toDoubleOrNull()
+    if (!values[0].isLatitude() || !values[1].isLongitude()) return null
 
-    if (latitude == null || longitude == null) return null
-    if (latitude !in -90.0.. 90.0 || longitude !in -180.00..180.00) return null
-
-
-    return Geolocation(coordinates, latitude.toString(), longitude.toString())
+    return Geolocation(coordinates, values[0], values[1])
 }
 
 fun String.tryToGetWifi(): Wifi? {
@@ -109,4 +106,31 @@ fun String.tryToGetWifi(): Wifi? {
         password = password,
         encryption = encryption
     )
+}
+
+fun String.isLink(): Boolean {
+    return startsWith("http://") || startsWith("https://")
+}
+
+fun String.isEmail(): Boolean {
+    val regex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
+    return this.matches(regex)
+}
+
+fun String.isPhoneNumber(): Boolean {
+    return startsWith("tel:") || isAllPhoneNumberValidCharacters()
+}
+
+fun String.isLatitude(): Boolean {
+    val double = toDoubleOrNull()
+    if (double == null) return false
+    if (double !in -90.0.. 90.0) return false
+    return true
+}
+
+fun String.isLongitude(): Boolean {
+    val double = toDoubleOrNull()
+    if (double == null) return false
+    if (double !in -180.00..180.00) return false
+    return true
 }
