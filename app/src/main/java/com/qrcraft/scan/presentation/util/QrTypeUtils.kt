@@ -26,8 +26,9 @@ fun QrType.getStringRes(): Int {
 @Composable
 fun QrType.getFormattedContent(): String {
     return when (this) {
-        is Text, is Link, is PhoneNumber, is Geolocation -> rawContent
-        is Contact -> "$name\n$email\n$phone"
+        is Text, is Link, is PhoneNumber -> rawContent
+        is Geolocation -> if (latitude != null && longitude != null) "$latitude,$longitude" else rawContent
+        is Contact -> if (name != null && email != null && phone != null) "$name\n$email\n$phone" else rawContent
 
         is Wifi -> {
             val encryptionValue = encryption

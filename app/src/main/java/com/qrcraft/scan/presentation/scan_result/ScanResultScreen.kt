@@ -406,6 +406,8 @@ private fun LoginScreenPreviewGeolocation() {
             state = ScanResultState(
                 qrType = Geolocation(
                     rawContent = "50.4501,30.5234",
+                    latitude = "50.4501",
+                    longitude = "30.5234",
                 )
             ),
             onAction = {}

@@ -21,7 +21,9 @@ sealed class QrType(open val rawContent: String) {
     ): QrType(rawContent)
 
     data class Geolocation(
-        override val rawContent: String
+        override val rawContent: String,
+        val latitude: String?,
+        val longitude: String?
     ): QrType(rawContent)
 
     data class Wifi(

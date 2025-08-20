@@ -86,28 +86,28 @@ class QrTypeDetectorTest {
     fun `is Geolocation 1` () {
         val content = "48.85852536332933, 2.294459839289565"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Geolocation(rawContent = content))
+        assertThat(result).isEqualTo(Geolocation(rawContent = content, latitude = "48.85852536332933", longitude = "2.294459839289565"))
     }
 
     @Test
     fun `is Geolocation 2` () {
         val content = "48.85852536332933,2.294459839289565"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Geolocation(rawContent = content))
+        assertThat(result).isEqualTo(Geolocation(rawContent = content, latitude = "48.85852536332933", longitude = "2.294459839289565"))
     }
 
     @Test
     fun `is Geolocation 3` () {
         val content = "geo:50.4501, 30.5234"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Geolocation(rawContent = "50.4501, 30.5234"))
+        assertThat(result).isEqualTo(Geolocation(rawContent = "50.4501, 30.5234", latitude = "50.4501", longitude = "30.5234"))
     }
 
     @Test
     fun `is Geolocation 4` () {
         val content = "geo:50.4501,30.5234"
         val result = qrTypeDetector.getQrType(content)
-        assertThat(result).isEqualTo(Geolocation(rawContent = "50.4501,30.5234"))
+        assertThat(result).isEqualTo(Geolocation(rawContent = "50.4501,30.5234", latitude = "50.4501", longitude = "30.5234"))
     }
 
     @Test

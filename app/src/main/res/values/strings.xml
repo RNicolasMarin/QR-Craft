@@ -28,4 +28,17 @@
 
     <string name="create_qr_title">Create QR</string>
 
+    <string name="data_entry_generate">Generate QR-Code</string>
+    <string name="data_entry_text_placeholder">Text</string>
+    <string name="data_entry_link_placeholder">URL</string>
+    <string name="data_entry_contact_name_placeholder">Name</string>
+    <string name="data_entry_contact_email_placeholder">Email</string>
+    <string name="data_entry_contact_phone_number_placeholder">Phone Number</string>
+    <string name="data_entry_phone_number_placeholder">Phone Number</string>
+    <string name="data_entry_geolocation_latitude_placeholder">Latitude</string>
+    <string name="data_entry_geolocation_longitude_placeholder">Longitude</string>
+    <string name="data_entry_wifi_ssid_placeholder">SSID</string>
+    <string name="data_entry_wifi_password_placeholder">Password</string>
+    <string name="data_entry_wifi_encryption_type_placeholder">Encryption Type</string>
+
 </resources>
