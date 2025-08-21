@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.qrcraft.app.Screen.*
 import com.qrcraft.create.presentation.create_qr.CreateQrScreenRoot
 import com.qrcraft.create.presentation.data_entry.DataEntryScreenRoot
+import com.qrcraft.create.presentation.preview.PreviewScreen
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
 import com.qrcraft.scan.presentation.scan_result.ScanResultScreenRoot
 
@@ -60,8 +61,16 @@ fun NavigationRoot(
                 qrTypeOrdinal = args.qrTypeOrdinal,
                 onBackToCreateQr = {
                     navController.popBackStack()
+                },
+                onGoToPreview = {
+                    navController.navigate(Preview) {
+
+                    }
                 }
             )
+        }
+        composable<Preview> {
+            PreviewScreen()
         }
     }
 }

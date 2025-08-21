@@ -3,7 +3,6 @@ package com.qrcraft.create.presentation.data_entry
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -56,6 +55,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DataEntryScreenRoot(
     qrTypeOrdinal: Int,
     onBackToCreateQr: () -> Unit,
+    onGoToPreview: () -> Unit,
     viewModel: DataEntryViewModel = koinViewModel()
 ) {
 
@@ -69,6 +69,7 @@ fun DataEntryScreenRoot(
         onAction = { action ->
             when (action) {
                 GoBackToCreateQr -> onBackToCreateQr()
+                GoToPreview -> onGoToPreview()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -134,7 +135,7 @@ fun DataEntryScreenContent(
             ),
             contentPadding = PaddingValues(12.dp),
             enabled = state.canGenerate,
-            onClick = {}
+            onClick = { onAction(GoToPreview) }
         ) {
             Text(
                 text = stringResource(R.string.data_entry_generate),
@@ -147,7 +148,7 @@ fun DataEntryScreenContent(
 }
 
 @Composable
-fun ColumnScope.DataEntryScreenContentFields(
+fun DataEntryScreenContentFields(
     state: DataEntryState,
     onAction: (DataEntryAction) -> Unit,
     modifier: Modifier = Modifier

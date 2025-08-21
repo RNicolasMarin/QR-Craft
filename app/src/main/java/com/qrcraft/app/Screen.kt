@@ -20,4 +20,7 @@ sealed class Screen {
         val qrTypeOrdinal: Int
     ): Screen()
 
+    @Serializable
+    data object Preview: Screen()
+
 }
