@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftTopBar
-import com.qrcraft.core.presentation.designsystem.DimensTopBar
+import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
@@ -91,7 +91,7 @@ fun DataEntryScreen(
     qrTypeUI: QrTypeUI,
     state: DataEntryState,
     onAction: (DataEntryAction) -> Unit,
-    dimens: DimensTopBar = MaterialTheme.dimen.topBar
+    dimens: Dimens = MaterialTheme.dimen
 ) {
     val scrollState = rememberScrollState()
 
@@ -101,14 +101,18 @@ fun DataEntryScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(WindowInsets.navigationBars.asPaddingValues())
-            .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp)
+            .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd, bottom = 16.dp)
             .verticalScroll(scrollState),
     ) {
         QRCraftTopBar(
             color = MaterialTheme.colorScheme.onSurface,
             titleRes = qrTypeUI.textRes,
+            modifier = Modifier.fillMaxWidth(),
             onBackClicked = { onAction(GoBackToCreateQr) }
         )
+
+        Spacer(modifier = Modifier.height(dimens.dataEntry.spaceTopBarAndContent))
+
         DataEntryScreenContent(
             state = state,
             onAction = onAction

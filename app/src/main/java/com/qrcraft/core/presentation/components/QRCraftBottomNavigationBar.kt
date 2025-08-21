@@ -19,9 +19,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.designsystem.DimensBottomBar
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
+import com.qrcraft.core.presentation.designsystem.dimen
 
 @Composable
 fun QRCraftBottomNavigationBar(
@@ -29,6 +31,7 @@ fun QRCraftBottomNavigationBar(
     isOnHistory: Boolean = false,
     isOnCreating: Boolean = false,
     onCreate: () -> Unit,
+    dimens: DimensBottomBar = MaterialTheme.dimen.bottomBar
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -38,7 +41,7 @@ fun QRCraftBottomNavigationBar(
         Row(
             modifier = modifier
                 .background(SurfaceHigher, RoundedCornerShape(100.dp))
-                .padding(4.dp)
+                .padding(dimens.padding)
 
         ) {
             QRCraftBottomNavigationBarSecondaryButton(
@@ -48,7 +51,7 @@ fun QRCraftBottomNavigationBar(
                 onClick = {}
             )
 
-            Spacer(modifier = Modifier.width(72.dp))
+            Spacer(modifier = Modifier.width(dimens.spaceBetween))
 
             QRCraftBottomNavigationBarSecondaryButton(
                 iconRes = R.drawable.ic_create,
@@ -60,7 +63,7 @@ fun QRCraftBottomNavigationBar(
         IconButton(
             onClick = {},
             modifier = modifier
-                .size(64.dp)
+                .size(dimens.scanOuter)
                 .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(100.dp))
         ) {
             Icon(

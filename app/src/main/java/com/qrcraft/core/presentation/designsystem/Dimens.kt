@@ -6,7 +6,9 @@ import androidx.compose.ui.unit.dp
 data class Dimens(
     val scanResult: DimensScanResult,
     val createQr: DimensCreateQr,
+    val dataEntry: DimensDataEntry,
     val topBar: DimensTopBar,
+    val bottomBar: DimensBottomBar
 )
 
 data class DimensScanResult(
@@ -17,10 +19,21 @@ data class DimensCreateQr(
     val columnsAmount: Int
 )
 
+data class DimensDataEntry(
+    val spaceTopBarAndContent: Dp,
+    val padding: Dp
+)
+
 data class DimensTopBar(
     val paddingStart: Dp,
     val paddingEnd: Dp,
     val spaceEnd: Dp
+)
+
+data class DimensBottomBar(
+    val padding: Dp,
+    val spaceBetween: Dp,
+    val scanOuter: Dp,
 )
 
 data class DimensScanResultScannedContent(
@@ -37,6 +50,11 @@ val dimensMobile = Dimens(
         paddingEnd = 16.dp,
         spaceEnd = 24.dp
     ),
+    bottomBar = DimensBottomBar(
+        padding = 4.dp,
+        spaceBetween = 80.dp,
+        scanOuter = 64.dp,
+    ),
     scanResult = DimensScanResult(
         scannedContent = DimensScanResultScannedContent(
             qr = 160.dp,
@@ -48,6 +66,10 @@ val dimensMobile = Dimens(
     ),
     createQr = DimensCreateQr(
         columnsAmount = 2
+    ),
+    dataEntry = DimensDataEntry(
+        spaceTopBarAndContent = 0.dp,
+        padding = 16.dp
     )
 )
 
@@ -56,6 +78,11 @@ val dimensWider = Dimens(
         paddingStart = 24.dp,
         paddingEnd = 24.dp,
         spaceEnd = 32.dp
+    ),
+    bottomBar = DimensBottomBar(
+        padding = 8.dp,
+        spaceBetween = 72.dp,
+        scanOuter = 72.dp,
     ),
     scanResult = DimensScanResult(
         scannedContent = DimensScanResultScannedContent(
@@ -68,5 +95,9 @@ val dimensWider = Dimens(
     ),
     createQr = DimensCreateQr(
         columnsAmount = 3
+    ),
+    dataEntry = DimensDataEntry(
+        spaceTopBarAndContent = 12.dp,
+        padding = 24.dp
     )
 )

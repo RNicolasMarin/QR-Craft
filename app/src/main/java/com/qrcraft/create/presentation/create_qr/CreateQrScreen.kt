@@ -80,6 +80,7 @@ fun CreateQrScreen(
         ) {
             QRCraftTopBar(
                 color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth(),
                 titleRes = R.string.create_qr_title,
             )
             CreateQrScreenGrid(
