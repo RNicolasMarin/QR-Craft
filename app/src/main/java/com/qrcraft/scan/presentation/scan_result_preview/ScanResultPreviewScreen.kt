@@ -1,4 +1,4 @@
-package com.qrcraft.scan.presentation.scan_result
+package com.qrcraft.scan.presentation.scan_result_preview
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -59,8 +59,8 @@ import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
-import com.qrcraft.scan.presentation.scan_result.QrTypeTextState.*
-import com.qrcraft.scan.presentation.scan_result.ScanResultAction.*
+import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
+import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import com.qrcraft.scan.presentation.util.copyContent
 import com.qrcraft.scan.presentation.util.generateQrCode
 import com.qrcraft.scan.presentation.util.getFormattedContent
@@ -70,10 +70,11 @@ import com.qrcraft.scan.presentation.util.shareContent
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ScanResultScreenRoot(
+fun ScanResultPreviewScreenRoot(
+    titleRes: Int,
     qrContent: String,
-    onBackToScan: () -> Unit,
-    viewModel: ScanResultViewModel = koinViewModel()
+    onBackPressed: () -> Unit,
+    viewModel: ScanResultPreviewViewModel = koinViewModel()
 ) {
 
     LaunchedEffect(true) {
@@ -83,11 +84,12 @@ fun ScanResultScreenRoot(
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
-    ScanResultScreen(
+    ScanResultPreviewScreen(
+        titleRes = titleRes,
         state = viewModel.state,
         onAction = { action ->
             when (action) {
-                GoBackToScan -> onBackToScan()
+                GoBack -> onBackPressed()
                 is ShareContent -> {
                     context.shareContent(action.qrContent)
                 }
@@ -106,13 +108,14 @@ fun ScanResultScreenRoot(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScanResultScreen(
-    state: ScanResultState,
-    onAction: (ScanResultAction) -> Unit,
+fun ScanResultPreviewScreen(
+    titleRes: Int,
+    state: ScanResultPreviewState,
+    onAction: (ScanResultPreviewAction) -> Unit,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
     BackHandler {
-        onAction(GoBackToScan)
+        onAction(GoBack)
     }
 
     val scrollState = rememberScrollState()
@@ -126,8 +129,8 @@ fun ScanResultScreen(
     ) {
         QRCraftTopBar(
             color = OnOverlay,
-            titleRes = R.string.scan_result,
-            onBackClicked = { onAction(GoBackToScan) }
+            titleRes = titleRes,
+            onBackClicked = { onAction(GoBack) }
         )
 
         Spacer(modifier = Modifier.height(44.dp))
@@ -142,8 +145,8 @@ fun ScanResultScreen(
 
 @Composable
 fun ScanResultScannedContent(
-    state: ScanResultState,
-    onAction: (ScanResultAction) -> Unit,
+    state: ScanResultPreviewState,
+    onAction: (ScanResultPreviewAction) -> Unit,
     modifier: Modifier = Modifier,
     dimens: DimensScanResultScannedContent = MaterialTheme.dimen.scanResult.scannedContent
 ) {
@@ -343,8 +346,9 @@ enum class QrTypeTextState(val maxLines: Int, val overflow: TextOverflow, val bu
 @Composable
 private fun LoginScreenPreviewText() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = QrType.Text("Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.")
             ),
             onAction = {}
@@ -356,8 +360,9 @@ private fun LoginScreenPreviewText() {
 @Composable
 private fun LoginScreenPreviewLink() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = Link("http://https://pl-coding.mymemberspot.io")
             ),
             onAction = {}
@@ -369,8 +374,9 @@ private fun LoginScreenPreviewLink() {
 @Composable
 private fun LoginScreenPreviewContact() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = Contact(
                     rawContent = "BEGIN:VCARD\nVERSION:3.0\nN:Olivia Schmidt\nTEL:+1 (555) 284-7390\nEMAIL:olivia.schmidt@example.com\nEND:VCARD",
                     name = "Olivia Schmidt",
@@ -387,8 +393,9 @@ private fun LoginScreenPreviewContact() {
 @Composable
 private fun LoginScreenPreviewPhoneNumber() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = PhoneNumber(
                     rawContent = "+49 170 1234567",
                 )
@@ -402,8 +409,9 @@ private fun LoginScreenPreviewPhoneNumber() {
 @Composable
 private fun LoginScreenPreviewGeolocation() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = Geolocation(
                     rawContent = "50.4501,30.5234",
                     latitude = "50.4501",
@@ -419,8 +427,9 @@ private fun LoginScreenPreviewGeolocation() {
 @Composable
 private fun LoginScreenPreviewWifi() {
     QRCraftTheme {
-        ScanResultScreen(
-            state = ScanResultState(
+        ScanResultPreviewScreen(
+            titleRes = R.string.preview,
+            state = ScanResultPreviewState(
                 qrType = Wifi(
                     rawContent = "WIFI:S:DevHub_WiFi;T:WPA;P:QrCraft2025;H:false;;",
                     ssid = "DevHub_WiFi",

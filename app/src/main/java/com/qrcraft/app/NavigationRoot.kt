@@ -5,18 +5,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.qrcraft.R
 import com.qrcraft.app.Screen.*
 import com.qrcraft.create.presentation.create_qr.CreateQrScreenRoot
 import com.qrcraft.create.presentation.data_entry.DataEntryScreenRoot
-import com.qrcraft.create.presentation.preview.PreviewScreen
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
-import com.qrcraft.scan.presentation.scan_result.ScanResultScreenRoot
+import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewScreenRoot
 
 @Composable
 fun NavigationRoot(
     navController: NavHostController
 ) {
-
     NavHost(
         navController = navController,
         startDestination = Scan
@@ -37,9 +36,10 @@ fun NavigationRoot(
         }
         composable<ScanResult> {
             val args = it.toRoute<ScanResult>()
-            ScanResultScreenRoot(
+            ScanResultPreviewScreenRoot(
+                titleRes = R.string.scan_result,
                 qrContent = args.qrContent,
-                onBackToScan = {
+                onBackPressed = {
                     navController.navigate(Scan) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -49,9 +49,7 @@ fun NavigationRoot(
         composable<CreateQR> {
             CreateQrScreenRoot(
                 onDataEntry = { qrTypeOrdinal ->
-                    navController.navigate(DataEntry(qrTypeOrdinal)) {
-                        //popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(DataEntry(qrTypeOrdinal))
                 }
             )
         }
@@ -62,15 +60,20 @@ fun NavigationRoot(
                 onBackToCreateQr = {
                     navController.popBackStack()
                 },
-                onGoToPreview = {
-                    navController.navigate(Preview) {
-
-                    }
+                onGoToPreview = { content ->
+                    navController.navigate(Preview(content))
                 }
             )
         }
         composable<Preview> {
-            PreviewScreen()
+            val args = it.toRoute<Preview>()
+            ScanResultPreviewScreenRoot(
+                titleRes = R.string.preview,
+                qrContent = args.qrContent,
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

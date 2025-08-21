@@ -1,7 +1,5 @@
 package com.qrcraft.scan.presentation.scan
 
-import com.qrcraft.scan.domain.QrType
-
 sealed interface ScanEvent {
 
     data object RequestPermissionToSystem : ScanEvent

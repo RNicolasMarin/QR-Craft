@@ -24,6 +24,6 @@ sealed interface DataEntryAction {
         data class UpdateWifiEncryption(override val content: String): UpdateQrContent(content)
     }
 
-    data object GoToPreview: DataEntryAction
+    data object GenerateRawContent: DataEntryAction
 
 }

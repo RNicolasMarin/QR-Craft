@@ -36,6 +36,7 @@ import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
+import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
@@ -49,6 +50,7 @@ import com.qrcraft.create.presentation.create_qr.QrTypeUI.TEXT
 import com.qrcraft.create.presentation.create_qr.QrTypeUI.WIFI
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.*
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.UpdateQrContent.*
+import com.qrcraft.create.presentation.data_entry.DataEntryEvent.GoToPreview
 import com.qrcraft.scan.domain.QrType
 import com.qrcraft.scan.domain.QrType.*
 import org.koin.compose.viewmodel.koinViewModel
@@ -57,12 +59,18 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DataEntryScreenRoot(
     qrTypeOrdinal: Int,
     onBackToCreateQr: () -> Unit,
-    onGoToPreview: () -> Unit,
+    onGoToPreview: (String) -> Unit,
     viewModel: DataEntryViewModel = koinViewModel()
 ) {
 
     LaunchedEffect(true) {
         viewModel.onAction(SetQrType(QrTypeUI.entries.getOrNull(qrTypeOrdinal) ?: TEXT))
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is GoToPreview -> onGoToPreview(event.content)
+        }
     }
 
     DataEntryScreen(
@@ -71,7 +79,6 @@ fun DataEntryScreenRoot(
         onAction = { action ->
             when (action) {
                 GoBackToCreateQr -> onBackToCreateQr()
-                GoToPreview -> onGoToPreview()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -139,7 +146,7 @@ fun DataEntryScreenContent(
             ),
             contentPadding = PaddingValues(12.dp),
             enabled = state.canGenerate,
-            onClick = { onAction(GoToPreview) }
+            onClick = { onAction(GenerateRawContent) }
         ) {
             Text(
                 text = stringResource(R.string.data_entry_generate),

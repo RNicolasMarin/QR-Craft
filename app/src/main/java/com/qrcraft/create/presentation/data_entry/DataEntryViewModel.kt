@@ -4,18 +4,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.qrcraft.create.domain.DataEntryValidator
+import com.qrcraft.create.domain.RawContentGenerator
 import com.qrcraft.create.presentation.create_qr.QrTypeUI.*
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.*
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.UpdateQrContent.*
+import com.qrcraft.create.presentation.data_entry.DataEntryEvent.GoToPreview
 import com.qrcraft.scan.domain.QrType.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class DataEntryViewModel(
-    val dataEntryValidator: DataEntryValidator
+    val dataEntryValidator: DataEntryValidator,
+    val rawContentGenerator: RawContentGenerator
 ): ViewModel() {
 
     var state by mutableStateOf(DataEntryState())
         private set
+
+    private val eventChannel = Channel<DataEntryEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     fun onAction(action: DataEntryAction) {
         when (action) {
@@ -90,6 +100,14 @@ class DataEntryViewModel(
                     qrType = type,
                     canGenerate = canGenerate
                 )
+            }
+            is GenerateRawContent -> {
+                state.qrType?.let {
+                    val content = rawContentGenerator.createContent(it)
+                    viewModelScope.launch {
+                        eventChannel.send(GoToPreview(content))
+                    }
+                }
             }
             else -> Unit
         }

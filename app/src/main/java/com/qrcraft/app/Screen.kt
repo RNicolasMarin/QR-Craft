@@ -21,6 +21,8 @@ sealed class Screen {
     ): Screen()
 
     @Serializable
-    data object Preview: Screen()
+    data class Preview(
+        val qrContent: String
+    ): Screen()
 
 }
