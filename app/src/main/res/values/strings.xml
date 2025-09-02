@@ -43,5 +43,7 @@
 
     <string name="preview">Preview</string>
     <string name="scan_history_title">Scan History</string>
+    <string name="scan_history_tab_scanned">Scanned</string>
+    <string name="scan_history_tab_generated">Generated</string>
 
 </resources>

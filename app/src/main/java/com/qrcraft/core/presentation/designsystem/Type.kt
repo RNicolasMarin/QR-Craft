@@ -42,4 +42,11 @@ val Typography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.sp
     ),
+    labelMedium = TextStyle(
+        fontFamily = Suse,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    ),
 )
