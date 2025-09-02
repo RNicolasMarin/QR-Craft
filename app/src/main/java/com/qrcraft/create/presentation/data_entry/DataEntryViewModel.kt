@@ -36,9 +36,9 @@ class DataEntryViewModel(
                         TEXT -> Text("")
                         LINK -> Link("")
                         PHONE_NUMBER -> PhoneNumber("")
-                        CONTACT -> Contact("", null, null, null)
-                        GEOLOCATION -> Geolocation("", null, null)
-                        WIFI -> Wifi("", null, null, null)
+                        CONTACT -> Contact("")
+                        GEOLOCATION -> Geolocation("")
+                        WIFI -> Wifi("")
                     }
                 )
             }

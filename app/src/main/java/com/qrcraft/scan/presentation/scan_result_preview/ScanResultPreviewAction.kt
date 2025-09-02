@@ -17,4 +17,8 @@ sealed interface ScanResultPreviewAction {
     data class OpenLink(
         val link: String
     ): ScanResultPreviewAction
+
+    data class UpdateTitle(
+        val title: String
+    ): ScanResultPreviewAction
 }
