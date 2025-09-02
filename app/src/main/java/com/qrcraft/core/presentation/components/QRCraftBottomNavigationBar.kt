@@ -31,6 +31,7 @@ fun QRCraftBottomNavigationBar(
     isOnHistory: Boolean = false,
     isOnCreating: Boolean = false,
     onCreate: () -> Unit,
+    onHistory: () -> Unit,
     dimens: DimensBottomBar = MaterialTheme.dimen.bottomBar
 ) {
     Box(
@@ -48,7 +49,7 @@ fun QRCraftBottomNavigationBar(
                 iconRes = R.drawable.ic_history,
                 contentDescription = "History",
                 isHighlighting = isOnHistory,
-                onClick = {}
+                onClick = onHistory
             )
 
             Spacer(modifier = Modifier.width(dimens.spaceBetween))
@@ -108,7 +109,8 @@ private fun QRCraftBottomNavigationBarPreview() {
         QRCraftBottomNavigationBar(
             isOnHistory = true,
             isOnCreating = true,
-            onCreate = {}
+            onCreate = {},
+            onHistory = {}
         )
     }
 }

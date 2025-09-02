@@ -25,4 +25,7 @@ sealed class Screen {
         val qrContent: String
     ): Screen()
 
+    @Serializable
+    data object ScanHistory: Screen()
+
 }

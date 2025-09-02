@@ -68,15 +68,7 @@ import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
-import com.qrcraft.scan.presentation.scan.ScanAction.CustomDialogClosed
-import com.qrcraft.scan.presentation.scan.ScanAction.OnCreateQr
-import com.qrcraft.scan.presentation.scan.ScanAction.RequestPermission
-import com.qrcraft.scan.presentation.scan.ScanAction.ScannerLoading
-import com.qrcraft.scan.presentation.scan.ScanAction.ScannerQrNotFound
-import com.qrcraft.scan.presentation.scan.ScanAction.ScannerRestartRunning
-import com.qrcraft.scan.presentation.scan.ScanAction.ScannerSuccess
-import com.qrcraft.scan.presentation.scan.ScanAction.UpdateAfterPermissionRequested
-import com.qrcraft.scan.presentation.scan.ScanAction.UpdateGrantedInitially
+import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.*
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import com.qrcraft.scan.presentation.util.hasCameraPermission
@@ -90,6 +82,7 @@ import kotlin.math.min
 fun ScanScreenRoot(
     onScanResultSuccess: (String) -> Unit,
     onCreateQr: () -> Unit,
+    onScanHistory: () -> Unit,
     viewModel: ScanViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -144,6 +137,7 @@ fun ScanScreenRoot(
         onAction = { action ->
             when (action) {
                 OnCreateQr -> onCreateQr()
+                OnScanHistory -> onScanHistory()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -233,7 +227,8 @@ fun ScanScreen(
                         .fillMaxWidth()
                 ) {
                     QRCraftBottomNavigationBar(
-                        onCreate = { onAction(OnCreateQr) }
+                        onCreate = { onAction(OnCreateQr) },
+                        onHistory = { onAction(OnScanHistory) }
                     )
                 }
             }

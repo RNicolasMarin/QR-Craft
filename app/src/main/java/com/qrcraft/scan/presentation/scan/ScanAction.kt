@@ -24,5 +24,6 @@ sealed interface ScanAction {
     ): ScanAction
 
     data object OnCreateQr: ScanAction
+    data object OnScanHistory: ScanAction
 
 }

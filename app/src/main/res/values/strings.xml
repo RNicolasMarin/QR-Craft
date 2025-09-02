@@ -42,5 +42,6 @@
     <string name="data_entry_wifi_encryption_type_placeholder">Encryption Type</string>
 
     <string name="preview">Preview</string>
+    <string name="scan_history_title">Scan History</string>
 
 </resources>

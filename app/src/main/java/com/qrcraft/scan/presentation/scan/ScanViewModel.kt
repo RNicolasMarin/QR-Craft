@@ -102,7 +102,7 @@ class ScanViewModel: ViewModel() {
                 )
             }
 
-            OnCreateQr -> Unit
+            OnCreateQr, OnScanHistory -> Unit
         }
     }
 

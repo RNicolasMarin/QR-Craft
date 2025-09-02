@@ -96,7 +96,8 @@ fun CreateQrScreen(
         ) {
             QRCraftBottomNavigationBar(
                 isOnCreating = true,
-                onCreate = { }
+                onCreate = { },
+                onHistory = { }
             )
         }
     }
