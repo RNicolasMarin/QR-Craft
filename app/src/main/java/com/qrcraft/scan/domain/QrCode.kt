@@ -1,11 +1,14 @@
 package com.qrcraft.scan.domain
 
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
+
 data class QrCode(
     var id: Long? = null,
     var rawContent: String,
     var title: String = "",
     var type: QrCodeType,
-    var createdAt: Long = -1
+    var createdAt: Long = -1,
+    var scannedOrGenerated: ScannedOrGenerated = SCANNED
 )
 
 sealed class QrCodeType(val typeCode: Int) {
@@ -32,4 +35,9 @@ sealed class QrCodeType(val typeCode: Int) {
     ): QrCodeType(5)
 
     data object Text: QrCodeType(6)
+}
+
+enum class ScannedOrGenerated {
+    SCANNED,
+    GENERATED
 }

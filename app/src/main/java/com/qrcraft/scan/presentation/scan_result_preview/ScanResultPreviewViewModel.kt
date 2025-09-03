@@ -25,7 +25,8 @@ class ScanResultPreviewViewModel(
                 val qrType = qrTypeDetector.getQrCodeType(action.qrContent)
                 state = state.copy(
                     qrType = QrCode(
-                        rawContent= action.qrContent,
+                        rawContent = action.qrContent,
+                        scannedOrGenerated = action.scannedOrGenerated,
                         type = qrType
                     )
                 )

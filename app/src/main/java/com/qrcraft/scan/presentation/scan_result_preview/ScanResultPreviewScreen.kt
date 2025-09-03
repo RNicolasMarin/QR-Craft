@@ -72,6 +72,7 @@ import com.qrcraft.core.presentation.designsystem.rememberKeyboardVisibility
 import com.qrcraft.scan.domain.QrCode
 import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
+import com.qrcraft.scan.domain.ScannedOrGenerated
 import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import com.qrcraft.scan.presentation.util.copyContent
@@ -84,6 +85,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ScanResultPreviewScreenRoot(
+    scannedOrGenerated: ScannedOrGenerated,
     titleRes: Int,
     qrContent: String,
     onBackPressed: () -> Unit,
@@ -91,7 +93,12 @@ fun ScanResultPreviewScreenRoot(
 ) {
 
     LaunchedEffect(true) {
-        viewModel.onAction(SetNonSavedQrContent(qrContent))
+        viewModel.onAction(
+            SetNonSavedQrContent(
+                qrContent = qrContent,
+                scannedOrGenerated = scannedOrGenerated
+            )
+        )
     }
 
     DisposableEffect(Unit) {

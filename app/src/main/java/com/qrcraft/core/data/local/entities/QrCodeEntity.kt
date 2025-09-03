@@ -3,6 +3,7 @@ package com.qrcraft.core.data.local.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import kotlin.String
 
 @Entity(tableName = "qr_codes")
@@ -12,7 +13,8 @@ data class QrCodeEntity(
     var rawContent: String,
     var title: String,
     var type: Int,
-    var createdAt: Long
+    var createdAt: Long,
+    var scannedOrGenerated: Int
 )
 
 fun QrCode.toEntity() = QrCodeEntity(
@@ -20,5 +22,9 @@ fun QrCode.toEntity() = QrCodeEntity(
     rawContent = rawContent,
     title = title,
     type = type.typeCode,
-    createdAt = createdAt
+    createdAt = createdAt,
+    scannedOrGenerated = when (scannedOrGenerated) {
+        SCANNED -> 1
+        GENERATED -> 2
+    }
 )
