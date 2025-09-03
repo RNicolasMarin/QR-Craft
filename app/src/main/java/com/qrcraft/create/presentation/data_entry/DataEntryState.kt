@@ -1,8 +1,8 @@
 package com.qrcraft.create.presentation.data_entry
 
-import com.qrcraft.scan.domain.QrType
+import com.qrcraft.scan.domain.QrCode
 
 data class DataEntryState(
-    val qrType: QrType? = null,
+    val qrCode: QrCode? = null,
     val canGenerate: Boolean = false
 )

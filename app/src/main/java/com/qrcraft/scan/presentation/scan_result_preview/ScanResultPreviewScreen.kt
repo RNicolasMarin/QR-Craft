@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,8 +69,9 @@ import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.rememberKeyboardVisibility
-import com.qrcraft.scan.domain.QrType
-import com.qrcraft.scan.domain.QrType.*
+import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType
+import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import com.qrcraft.scan.presentation.util.copyContent
@@ -89,7 +91,13 @@ fun ScanResultPreviewScreenRoot(
 ) {
 
     LaunchedEffect(true) {
-        viewModel.onAction(SetQrContent(qrContent))
+        viewModel.onAction(SetNonSavedQrContent(qrContent))
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.onAction(OnScreenRemoved)
+        }
     }
 
     val context = LocalContext.current
@@ -211,7 +219,7 @@ fun ScanResultScannedContent(
                             //if focused and empty show hint, if not empty show the content
                             isFocused -> it.title
                             //if not focused show res if empty or title
-                            else -> it.title.ifBlank { stringResource(it.getStringRes()) }
+                            else -> it.title.ifBlank { stringResource(it.type.getStringRes()) }
                         },
                         onValueChange = { text -> onAction(UpdateTitle(text)) },
                         textStyle = MaterialTheme.typography.titleMedium.copy(
@@ -236,7 +244,7 @@ fun ScanResultScannedContent(
                             ) {
                                 if (isFocused && it.title.isBlank()) {
                                     Text(
-                                        text = stringResource(it.getStringRes()),
+                                        text = stringResource(it.type.getStringRes()),
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             textAlign = TextAlign.Center
                                         ),
@@ -251,8 +259,8 @@ fun ScanResultScannedContent(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    val contentModifier = when(it) {
-                        is QrType.Text -> Modifier.fillMaxWidth()
+                    val contentModifier = when(it.type) {
+                        is Text -> Modifier.fillMaxWidth()
                         is Link -> Modifier
                             .background(LinkBg)
                             .clickable(
@@ -261,7 +269,7 @@ fun ScanResultScannedContent(
                         else -> Modifier
                     }
 
-                    if (it !is Text && textState == TEXT_SHORT) {
+                    if (it.type !is Text && textState == TEXT_SHORT) {
                         textState = NOT_TEXT
                     }
 
@@ -411,7 +419,10 @@ private fun LoginScreenPreviewText() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrType.Text("Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.")
+                qrType = QrCode(
+                    rawContent = "Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.",
+                    type = QrCodeType.Text
+                )
             ),
             onAction = {}
         )
@@ -425,7 +436,10 @@ private fun LoginScreenPreviewLink() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = Link("http://https://pl-coding.mymemberspot.io")
+                qrType = QrCode(
+                    rawContent = "http://https://pl-coding.mymemberspot.io",
+                    type = Link
+                )
             ),
             onAction = {}
         )
@@ -439,11 +453,13 @@ private fun LoginScreenPreviewContact() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = Contact(
+                qrType = QrCode(
                     rawContent = "BEGIN:VCARD\nVERSION:3.0\nN:Olivia Schmidt\nTEL:+1 (555) 284-7390\nEMAIL:olivia.schmidt@example.com\nEND:VCARD",
-                    name = "Olivia Schmidt",
-                    email = "olivia.schmidt@example.com",
-                    phone = "+1 (555) 284-7390"
+                    type = Contact(
+                        name = "Olivia Schmidt",
+                        email = "olivia.schmidt@example.com",
+                        phone = "+1 (555) 284-7390"
+                    )
                 )
             ),
             onAction = {}
@@ -458,8 +474,9 @@ private fun LoginScreenPreviewPhoneNumber() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = PhoneNumber(
+                qrType = QrCode(
                     rawContent = "+49 170 1234567",
+                    type = PhoneNumber
                 )
             ),
             onAction = {}
@@ -474,10 +491,12 @@ private fun LoginScreenPreviewGeolocation() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = Geolocation(
+                qrType = QrCode(
                     rawContent = "50.4501,30.5234",
-                    latitude = "50.4501",
-                    longitude = "30.5234",
+                    type = Geolocation(
+                        latitude = "50.4501",
+                        longitude = "30.5234",
+                    )
                 )
             ),
             onAction = {}
@@ -492,11 +511,13 @@ private fun LoginScreenPreviewWifi() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = Wifi(
+                qrType = QrCode(
                     rawContent = "WIFI:S:DevHub_WiFi;T:WPA;P:QrCraft2025;H:false;;",
-                    ssid = "DevHub_WiFi",
-                    password = "QrCraft2025",
-                    encryption = "WPA"
+                    type = Wifi(
+                        ssid = "DevHub_WiFi",
+                        password = "QrCraft2025",
+                        encryption = "WPA"
+                    )
                 )
             ),
             onAction = {}

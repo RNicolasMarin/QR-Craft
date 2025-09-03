@@ -7,12 +7,13 @@ import androidx.compose.ui.res.stringResource
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import com.qrcraft.R
-import com.qrcraft.scan.domain.QrType
-import com.qrcraft.scan.domain.QrType.*
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
+import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType
+import com.qrcraft.scan.domain.QrCodeType.*
 
-fun QrType.getStringRes(): Int {
+fun QrCodeType.getStringRes(): Int {
     return when (this) {
         is Link -> R.string.qr_type_link
         is Contact -> R.string.qr_type_contact
@@ -24,16 +25,17 @@ fun QrType.getStringRes(): Int {
 }
 
 @Composable
-fun QrType.getFormattedContent(): String {
-    return when (this) {
+fun QrCode.getFormattedContent(): String {
+    val t = type
+    return when (t) {
         is Text, is Link, is PhoneNumber -> rawContent
-        is Geolocation -> if (latitude != null && longitude != null) "$latitude,$longitude" else rawContent
-        is Contact -> if (name != null && email != null && phone != null) "$name\n$email\n$phone" else rawContent
+        is Geolocation -> if (t.latitude != null && t.longitude != null) "${t.latitude},${t.longitude}" else rawContent
+        is Contact -> if (t.name != null && t.email != null && t.phone != null) "${t.name}\n${t.email}\n${t.phone}" else rawContent
 
         is Wifi -> {
-            val encryptionValue = encryption
-            val ssidValue = ssid
-            val passwordValue = password
+            val encryptionValue = t.encryption
+            val ssidValue = t.ssid
+            val passwordValue = t.password
 
             if (encryptionValue != null && ssidValue != null && passwordValue != null) {
                 "${stringResource(R.string.qr_type_wifi_ssid)} $ssidValue\n${stringResource(R.string.qr_type_wifi_password)} $passwordValue\n${stringResource(R.string.qr_type_wifi_encryption)} $encryptionValue"

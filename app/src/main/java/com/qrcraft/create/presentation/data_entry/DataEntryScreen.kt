@@ -51,8 +51,9 @@ import com.qrcraft.create.presentation.create_qr.QrTypeUI.WIFI
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.*
 import com.qrcraft.create.presentation.data_entry.DataEntryAction.UpdateQrContent.*
 import com.qrcraft.create.presentation.data_entry.DataEntryEvent.GoToPreview
-import com.qrcraft.scan.domain.QrType
-import com.qrcraft.scan.domain.QrType.*
+import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType
+import com.qrcraft.scan.domain.QrCodeType.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -168,12 +169,13 @@ fun DataEntryScreenContentFields(
     onAction: (DataEntryAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (state.qrType) {
+    val type = state.qrCode?.type
+    when (type) {
         is Text -> {
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_text_placeholder,
                 onValueChange = { onAction(UpdateText(it)) },
-                value = state.qrType.rawContent,
+                value = state.qrCode.rawContent,
                 modifier = modifier.fillMaxWidth(),
                 singleLine = false
             )
@@ -182,7 +184,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_link_placeholder,
                 onValueChange = { onAction(UpdateLink(it)) },
-                value = state.qrType.rawContent,
+                value = state.qrCode.rawContent,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Uri
             )
@@ -191,7 +193,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_contact_name_placeholder,
                 onValueChange = { onAction(UpdateContactName(it)) },
-                value = state.qrType.name,
+                value = type.name,
                 modifier = modifier.fillMaxWidth()
             )
 
@@ -200,7 +202,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_contact_email_placeholder,
                 onValueChange = { onAction(UpdateContactEmail(it)) },
-                value = state.qrType.email,
+                value = type.email,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Email
             )
@@ -210,7 +212,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_contact_phone_number_placeholder,
                 onValueChange = { onAction(UpdateContactPhone(it)) },
-                value = state.qrType.phone,
+                value = type.phone,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Phone
             )
@@ -219,7 +221,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_phone_number_placeholder,
                 onValueChange = { onAction(UpdatePhoneNumber(it)) },
-                value = state.qrType.rawContent,
+                value = state.qrCode.rawContent,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Phone
             )
@@ -228,7 +230,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_geolocation_latitude_placeholder,
                 onValueChange = { onAction(UpdateGeolocationLatitude(it)) },
-                value = state.qrType.latitude,
+                value = type.latitude,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Decimal
             )
@@ -238,7 +240,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_geolocation_longitude_placeholder,
                 onValueChange = { onAction(UpdateGeolocationLongitude(it)) },
-                value = state.qrType.longitude,
+                value = type.longitude,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Decimal
             )
@@ -247,7 +249,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_wifi_ssid_placeholder,
                 onValueChange = { onAction(UpdateWifiSsid(it)) },
-                value = state.qrType.ssid,
+                value = type.ssid,
                 modifier = modifier.fillMaxWidth()
             )
 
@@ -256,7 +258,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_wifi_password_placeholder,
                 onValueChange = { onAction(UpdateWifiPassword(it)) },
-                value = state.qrType.password,
+                value = type.password,
                 modifier = modifier.fillMaxWidth()
             )
 
@@ -265,7 +267,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_wifi_encryption_type_placeholder,
                 onValueChange = { onAction(UpdateWifiEncryption(it)) },
-                value = state.qrType.encryption,
+                value = type.encryption,
                 modifier = modifier.fillMaxWidth()
             )
         }
@@ -318,7 +320,10 @@ private fun DataEntryScreenPreviewText() {
         DataEntryScreen(
             qrTypeUI = TEXT,
             state = DataEntryState(
-                qrType = QrType.Text("Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.")
+                qrCode = QrCode(
+                    rawContent = "Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.",
+                    type = QrCodeType.Text
+                )
             ),
             onAction = {}
         )
@@ -332,7 +337,10 @@ private fun DataEntryScreenPreviewLink() {
         DataEntryScreen(
             qrTypeUI = LINK,
             state = DataEntryState(
-                qrType = Link("http://https://pl-coding.mymemberspot.io")
+                qrCode = QrCode(
+                    rawContent = "http://https://pl-coding.mymemberspot.io",
+                    type = Link
+                )
             ),
             onAction = {}
         )
@@ -346,11 +354,13 @@ private fun DataEntryScreenPreviewContact() {
         DataEntryScreen(
             qrTypeUI = CONTACT,
             state = DataEntryState(
-                qrType = Contact(
+                qrCode = QrCode(
                     rawContent = "",
-                    name = "Olivia Schmidt",
-                    email = "olivia.schmidt@example.com",
-                    phone = "+1 (555) 284-7390"
+                    type = Contact(
+                        name = "Olivia Schmidt",
+                        email = "olivia.schmidt@example.com",
+                        phone = "+1 (555) 284-7390"
+                    )
                 )
             ),
             onAction = {}
@@ -365,8 +375,9 @@ private fun DataEntryScreenPreviewPhoneNumber() {
         DataEntryScreen(
             qrTypeUI = PHONE_NUMBER,
             state = DataEntryState(
-                qrType = PhoneNumber(
-                    rawContent = "+49 170 1234567"
+                qrCode = QrCode(
+                    rawContent = "+49 170 1234567",
+                    type = PhoneNumber
                 )
             ),
             onAction = {}
@@ -381,10 +392,12 @@ private fun DataEntryScreenPreviewGeolocation() {
         DataEntryScreen(
             qrTypeUI = GEOLOCATION,
             state = DataEntryState(
-                qrType = Geolocation(
+                qrCode = QrCode(
                     rawContent = "",
-                    latitude = "50.4501",
-                    longitude = "30.5234",
+                    type = Geolocation(
+                        latitude = "50.4501",
+                        longitude = "30.5234",
+                    )
                 )
             ),
             onAction = {}
@@ -399,11 +412,13 @@ private fun DataEntryScreenPreviewWifi() {
         DataEntryScreen(
             qrTypeUI = WIFI,
             state = DataEntryState(
-                qrType = Wifi(
+                qrCode = QrCode(
                     rawContent = "",
-                    ssid = "DevHub_WiFi",
-                    password = "QrCraft2025",
-                    encryption = "WPA"
+                    type = Wifi(
+                        ssid = "DevHub_WiFi",
+                        password = "QrCraft2025",
+                        encryption = "WPA"
+                    )
                 )
             ),
             onAction = {}

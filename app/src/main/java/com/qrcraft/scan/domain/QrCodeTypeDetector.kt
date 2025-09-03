@@ -1,10 +1,10 @@
 package com.qrcraft.scan.domain
 
-import com.qrcraft.scan.domain.QrType.*
+import com.qrcraft.scan.domain.QrCodeType.*
 
-class QrTypeDetector {
+class QrCodeTypeDetector {
 
-    fun getQrType(rawContent: String): QrType {
+    fun getQrCodeType(rawContent: String): QrCodeType {
         val link = rawContent.tryToGetLink()
         if (link != null) return link
 
@@ -20,7 +20,7 @@ class QrTypeDetector {
         val wifi = rawContent.tryToGetWifi()
         if (wifi != null) return wifi
 
-        return Text(rawContent)
+        return Text
     }
 }
 
@@ -30,7 +30,7 @@ fun List<String>.getContentInLine(prefix: String): String? {
 
 fun String.tryToGetLink(): Link? {
     val isValid = isLink()
-    return if (isValid) Link(this) else null
+    return if (isValid) Link else null
 }
 
 fun String.tryToGetContact(): Contact? {
@@ -43,7 +43,6 @@ fun String.tryToGetContact(): Contact? {
     val phone = lines.getContentInLine("TEL:")
 
     return Contact(
-        rawContent = this,
         name = name,
         email = email,
         phone = phone
@@ -54,7 +53,7 @@ fun String.tryToGetPhoneNumber(): PhoneNumber? {
     val isValid = isPhoneNumber()
     if (!isValid) return null
 
-    return PhoneNumber(substringAfter("tel:"))
+    return PhoneNumber
 }
 
 fun String.isAllPhoneNumberValidCharacters(): Boolean {
@@ -79,7 +78,7 @@ fun String.tryToGetGeolocation(): Geolocation? {
 
     if (!values[0].isLatitude() || !values[1].isLongitude()) return null
 
-    return Geolocation(coordinates, values[0], values[1])
+    return Geolocation( values[0], values[1])
 }
 
 fun String.tryToGetWifi(): Wifi? {
@@ -101,7 +100,6 @@ fun String.tryToGetWifi(): Wifi? {
     val password = map["P"]   // Password value
 
     return Wifi(
-        rawContent = this,
         ssid = ssid,
         password = password,
         encryption = encryption

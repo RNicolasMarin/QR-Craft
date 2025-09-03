@@ -1,6 +1,7 @@
 package com.qrcraft.app
 
 import android.app.Application
+import com.qrcraft.core.data.di.coreDataModule
 import com.qrcraft.create.presentation.di.createViewModelModule
 import com.qrcraft.scan.presentation.di.scanViewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -15,7 +16,8 @@ class QRCraftApplication : Application() {
             androidContext(this@QRCraftApplication)
             modules(
                 scanViewModelModule,
-                createViewModelModule
+                createViewModelModule,
+                coreDataModule
             )
         }
     }

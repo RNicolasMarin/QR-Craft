@@ -2,7 +2,7 @@ package com.qrcraft.scan.presentation.scan_result_preview
 
 sealed interface ScanResultPreviewAction {
 
-    data class SetQrContent(val qrContent: String): ScanResultPreviewAction
+    data class SetNonSavedQrContent(val qrContent: String): ScanResultPreviewAction
 
     data object GoBack: ScanResultPreviewAction
 
@@ -21,4 +21,7 @@ sealed interface ScanResultPreviewAction {
     data class UpdateTitle(
         val title: String
     ): ScanResultPreviewAction
+
+    data object OnScreenRemoved : ScanResultPreviewAction
+
 }
