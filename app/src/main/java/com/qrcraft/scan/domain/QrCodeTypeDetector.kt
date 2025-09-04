@@ -53,7 +53,7 @@ fun String.tryToGetPhoneNumber(): PhoneNumber? {
     val isValid = isPhoneNumber()
     if (!isValid) return null
 
-    return PhoneNumber
+    return PhoneNumber(substringAfter("tel:"))
 }
 
 fun String.isAllPhoneNumberValidCharacters(): Boolean {

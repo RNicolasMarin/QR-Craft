@@ -8,5 +8,8 @@ interface QrCodeRepository {
 
     suspend fun upsert(qrCode: QrCode)
 
-    fun getQrCodes(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>>
+    fun getQrCodesScanned(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>>
+
+    fun getQrCodesGenerated(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>>
+
 }

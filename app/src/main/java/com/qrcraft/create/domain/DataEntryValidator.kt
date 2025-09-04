@@ -23,7 +23,8 @@ class DataEntryValidator {
                 return validName && validEmail && validPhone
             }
             is PhoneNumber -> {
-                qrType.rawContent.isPhoneNumber()
+                val validPhone = type.phone?.isPhoneNumber() == true
+                return validPhone
             }
             is Geolocation -> {
                 val validLat = type.latitude?.isLatitude() ?: false

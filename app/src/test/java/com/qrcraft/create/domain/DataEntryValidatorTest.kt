@@ -174,8 +174,8 @@ class DataEntryValidatorTest {
     @Test
     fun `valid Phone Number 1`() {
         val content = QrCode(
-            rawContent = "+49 170 1234567",
-            type = PhoneNumber
+            rawContent = "",
+            type = PhoneNumber("+49 170 1234567")
         )
         val result = dataEntryValidator.isValidContent(content)
         assertThat(result).isTrue()
@@ -184,8 +184,8 @@ class DataEntryValidatorTest {
     @Test
     fun `valid Phone Number 2`() {
         val content = QrCode(
-            rawContent = "49 170 1234567",
-            type = PhoneNumber
+            rawContent = "",
+            type = PhoneNumber("49 170 1234567")
         )
         val result = dataEntryValidator.isValidContent(content)
         assertThat(result).isTrue()
@@ -194,8 +194,8 @@ class DataEntryValidatorTest {
     @Test
     fun `invalid Phone Number`() {
         val content = QrCode(
-            rawContent = "+49 a 170 1234567",
-            type = PhoneNumber
+            rawContent = "",
+            type = PhoneNumber("+49 a 170 1234567")
         )
         val result = dataEntryValidator.isValidContent(content)
         assertThat(result).isFalse()

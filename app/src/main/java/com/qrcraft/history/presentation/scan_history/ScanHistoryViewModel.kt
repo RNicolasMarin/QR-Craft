@@ -22,11 +22,22 @@ class ScanHistoryViewModel(
     init {
         viewModelScope.launch {
             snapshotFlow { state.scannedOrGenerated }.collectLatest {
-                repository.getQrCodes(
+                repository.getQrCodesScanned(
                     state.scannedOrGenerated
                 ).collectLatest {
                     state = state.copy(
-                        qrCodes = it
+                        qrCodesScanned = it
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
+            snapshotFlow { state.scannedOrGenerated }.collectLatest {
+                repository.getQrCodesGenerated(
+                    state.scannedOrGenerated
+                ).collectLatest {
+                    state = state.copy(
+                        qrCodesGenerated = it
                     )
                 }
             }

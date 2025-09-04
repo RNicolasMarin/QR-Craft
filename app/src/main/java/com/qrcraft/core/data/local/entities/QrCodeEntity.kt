@@ -10,7 +10,7 @@ import kotlin.String
 @Entity(tableName = "qr_codes")
 data class QrCodeEntity(
     @PrimaryKey(autoGenerate = true)
-    var id: Long? = null,
+    var id: Int? = null,
     var rawContent: String,
     var title: String,
     var type: Int,
@@ -19,16 +19,16 @@ data class QrCodeEntity(
 )
 
 fun QrCode.toEntity() = QrCodeEntity(
-    id = id,
+    id = if (id == -1) null else id,
     rawContent = rawContent,
     title = title,
-    type = type.typeCode,
+    type = type.typeId,
     createdAt = createdAt,
     scannedOrGenerated = scannedOrGenerated.typeValue
 )
 
 fun QrCodeEntity.toDomain() = QrCode(
-    id = id,
+    id = id ?: -1,
     rawContent = rawContent,
     title = title,
     type = QrCodeTypeConverter().convertToType(type, rawContent),

@@ -25,10 +25,11 @@ fun QrCodeType.getStringRes(): Int {
 }
 
 @Composable
-fun QrCode.getFormattedContent(): String {
+fun QrCode.getFormattedContentResultPreview(): String {
     val t = type
     return when (t) {
-        is Text, is Link, is PhoneNumber -> rawContent
+        is Text, is Link -> rawContent
+        is PhoneNumber -> rawContent.substringAfter("tel:")
         is Geolocation -> if (t.latitude != null && t.longitude != null) "${t.latitude},${t.longitude}" else rawContent
         is Contact -> if (t.name != null && t.email != null && t.phone != null) "${t.name}\n${t.email}\n${t.phone}" else rawContent
 
@@ -39,6 +40,27 @@ fun QrCode.getFormattedContent(): String {
 
             if (encryptionValue != null && ssidValue != null && passwordValue != null) {
                 "${stringResource(R.string.qr_type_wifi_ssid)} $ssidValue\n${stringResource(R.string.qr_type_wifi_password)} $passwordValue\n${stringResource(R.string.qr_type_wifi_encryption)} $encryptionValue"
+            } else {
+                rawContent
+            }
+        }
+    }
+}
+
+@Composable
+fun QrCode.getFormattedContentHistory(): String {
+    val t = type
+    return when (t) {
+        is Text, is Link -> rawContent
+        is PhoneNumber -> rawContent.substringAfter("tel:")
+        is Geolocation -> if (t.latitude != null && t.longitude != null) "${t.latitude},${t.longitude}" else rawContent
+        is Contact -> if (t.name != null && t.email != null) "${t.name}\n${t.email}" else rawContent
+        is Wifi -> {
+            val ssidValue = t.ssid
+            val passwordValue = t.password
+
+            if (ssidValue != null && passwordValue != null) {
+                "${stringResource(R.string.qr_type_wifi_ssid)} $ssidValue\n${stringResource(R.string.qr_type_wifi_password)} $passwordValue"
             } else {
                 rawContent
             }

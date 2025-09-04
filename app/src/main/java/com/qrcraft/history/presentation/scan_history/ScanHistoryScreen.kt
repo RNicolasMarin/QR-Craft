@@ -1,8 +1,11 @@
 package com.qrcraft.history.presentation.scan_history
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -11,7 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -22,17 +32,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QrCodeTypeIcon
+import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
+import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
+import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.core.presentation.formatTimestamp
+import com.qrcraft.create.presentation.create_qr.QrTypeUI
 import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
+import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType.*
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
+import com.qrcraft.scan.presentation.util.getFormattedContentHistory
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -81,6 +104,26 @@ fun ScanHistoryScreen(
             )
         }
 
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = dimens.paddingStart, end = dimens.paddingEnd)
+        ) {
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
+                            Color(0xFFEDF2F5)                    // bottom solid
+                        )
+                    )
+                )
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -111,7 +154,7 @@ fun ScanHistoryTabsAndContent(
     state: ScanHistoryState,
     onAction: (ScanHistoryAction) -> Unit,
     modifier: Modifier = Modifier,
-    dimens: DimensTopBar = MaterialTheme.dimen.topBar
+    dimens: Dimens = MaterialTheme.dimen,
 ) {
     Column(
         modifier = modifier
@@ -141,7 +184,7 @@ fun ScanHistoryTabsAndContent(
             divider = { },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = dimens.paddingStart, end = dimens.paddingEnd)
+                .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -164,8 +207,130 @@ fun ScanHistoryTabsAndContent(
             color = MaterialTheme.colorScheme.outline,
             thickness = 1.dp
         )
-        Text(text = state.qrCodes.toString())
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val listStateScanned = rememberLazyListState()
+        val listStateGenerated = rememberLazyListState()
+
+        Crossfade(targetState = state.scannedOrGenerated) { tab ->
+            when (tab) {
+                SCANNED -> ScanHistoryList(
+                    qrCodes = state.qrCodesScanned,
+                    listState = listStateScanned
+                )
+                GENERATED -> ScanHistoryList(
+                    qrCodes = state.qrCodesGenerated,
+                    listState = listStateGenerated
+                )
+            }
+        }
     }
+}
+
+@Composable
+fun ScanHistoryList(
+    qrCodes: List<QrCode>,
+    dimens: Dimens = MaterialTheme.dimen,
+    listState: LazyListState
+) {
+    LazyColumn(
+        state = listState,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
+    ) {
+        items(
+            items = qrCodes,
+            key = { qrCode -> qrCode.id }
+        ) { qrCode ->
+            ScanHistoryItem(
+                qrCode = qrCode,
+                modifier = Modifier
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(dimens.bottomBar.scanOuter))
+        }
+    }
+}
+
+@Composable
+fun ScanHistoryItem(
+    qrCode: QrCode,
+    modifier: Modifier = Modifier
+) {
+    val uiType = QrTypeUI.entries.first { qrCode.type.typeId == it.qrCodeTypeId}
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceHigher),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            QrCodeTypeIcon(
+                item = uiType,
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                val title = qrCode.title.ifBlank { stringResource(uiType.textRes) }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val content = qrCode.getFormattedContentHistory()
+
+                    Text(
+                        text = content,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                    )
+
+                    if (qrCode.type is Contact || qrCode.type is Wifi) {
+                        Text(
+                            text = stringResource(R.string.scan_history_empty_field),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = formatTimestamp(qrCode.createdAt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = OnSurfaceDisabled,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
 }
 
 @MultiDevicePreview

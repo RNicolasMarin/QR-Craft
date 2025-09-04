@@ -221,7 +221,7 @@ fun DataEntryScreenContentFields(
             DataEntryScreenContentField(
                 placeholderRes = R.string.data_entry_phone_number_placeholder,
                 onValueChange = { onAction(UpdatePhoneNumber(it)) },
-                value = state.qrCode.rawContent,
+                value = type.phone,
                 modifier = modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Phone
             )
@@ -376,8 +376,8 @@ private fun DataEntryScreenPreviewPhoneNumber() {
             qrTypeUI = PHONE_NUMBER,
             state = DataEntryState(
                 qrCode = QrCode(
-                    rawContent = "+49 170 1234567",
-                    type = PhoneNumber
+                    rawContent = "",
+                    type = PhoneNumber("+49 170 1234567")
                 )
             ),
             onAction = {}

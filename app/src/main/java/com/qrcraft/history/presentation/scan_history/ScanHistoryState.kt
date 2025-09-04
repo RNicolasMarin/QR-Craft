@@ -6,5 +6,6 @@ import com.qrcraft.scan.domain.ScannedOrGenerated.*
 
 data class ScanHistoryState(
     var scannedOrGenerated: ScannedOrGenerated = SCANNED,
-    var qrCodes: List<QrCode> = emptyList()
+    var qrCodesScanned: List<QrCode> = emptyList(),
+    var qrCodesGenerated: List<QrCode> = emptyList()
 )

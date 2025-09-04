@@ -38,7 +38,7 @@ class DataEntryViewModel(
                         type = when (action.qrTypeUI) {
                             TEXT -> Text
                             LINK -> Link
-                            PHONE_NUMBER -> PhoneNumber
+                            PHONE_NUMBER -> PhoneNumber()
                             CONTACT -> Contact()
                             GEOLOCATION -> Geolocation()
                             WIFI -> Wifi()
@@ -78,8 +78,8 @@ class DataEntryViewModel(
                     }
                     is UpdatePhoneNumber -> {
                         QrCode(
-                            rawContent = action.content,
-                            type = PhoneNumber
+                            rawContent = "",
+                            type = PhoneNumber(action.content)
                         )
                     }
                     is UpdateGeolocationLatitude, is UpdateGeolocationLongitude -> {

@@ -15,25 +15,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.DimensCreateQr
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
@@ -154,21 +152,9 @@ fun RowScope.CreateQrScreenGridCell(
             modifier = Modifier
                 .padding(vertical = 20.dp, horizontal = 16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(item.iconBackColor, RoundedCornerShape(100.dp))
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = item.iconRes),
-                    tint = item.iconColor,
-                    contentDescription = stringResource(item.textRes),
-                    modifier = Modifier
-                        .size(16.dp)
-                )
-            }
-
+            QrCodeTypeIcon(
+                item = item,
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 

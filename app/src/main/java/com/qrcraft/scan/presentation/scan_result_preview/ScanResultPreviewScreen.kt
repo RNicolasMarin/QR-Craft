@@ -77,7 +77,7 @@ import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import com.qrcraft.scan.presentation.util.copyContent
 import com.qrcraft.scan.presentation.util.generateQrCode
-import com.qrcraft.scan.presentation.util.getFormattedContent
+import com.qrcraft.scan.presentation.util.getFormattedContentResultPreview
 import com.qrcraft.scan.presentation.util.getStringRes
 import com.qrcraft.scan.presentation.util.opeLink
 import com.qrcraft.scan.presentation.util.shareContent
@@ -280,7 +280,7 @@ fun ScanResultScannedContent(
                         textState = NOT_TEXT
                     }
 
-                    val formattedContent = it.getFormattedContent()
+                    val formattedContent = it.getFormattedContentResultPreview()
 
                     Text(
                         text = formattedContent,
@@ -482,8 +482,8 @@ private fun LoginScreenPreviewPhoneNumber() {
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrType = QrCode(
-                    rawContent = "+49 170 1234567",
-                    type = PhoneNumber
+                    rawContent = "",
+                    type = PhoneNumber("+49 170 1234567")
                 )
             ),
             onAction = {}

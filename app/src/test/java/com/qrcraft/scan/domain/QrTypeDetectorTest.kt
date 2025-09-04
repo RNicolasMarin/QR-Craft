@@ -56,28 +56,28 @@ class QrTypeDetectorTest {
     fun `is Phone Number starting with + 1 ` () {
         val content = "tel:+49 170 1234567"
         val result = qrTypeDetector.getQrCodeType(content)
-        assertThat(result).isEqualTo(PhoneNumber)
+        assertThat(result).isEqualTo(PhoneNumber("+49 170 1234567"))
     }
 
     @Test
     fun `is Phone Number starting with + 2` () {
         val content = "+49 170 1234567"
         val result = qrTypeDetector.getQrCodeType(content)
-        assertThat(result).isEqualTo(PhoneNumber)
+        assertThat(result).isEqualTo(PhoneNumber("+49 170 1234567"))
     }
 
     @Test
     fun `is Phone Number not starting with + 1` () {
         val content = "tel:1 (555) 123-4567"
         val result = qrTypeDetector.getQrCodeType(content)
-        assertThat(result).isEqualTo(PhoneNumber)
+        assertThat(result).isEqualTo(PhoneNumber("1 (555) 123-4567"))
     }
 
     @Test
     fun `is Phone Number not starting with + 2` () {
         val content = "1 (555) 123-4567"
         val result = qrTypeDetector.getQrCodeType(content)
-        assertThat(result).isEqualTo(PhoneNumber)
+        assertThat(result).isEqualTo(PhoneNumber("1 (555) 123-4567"))
     }
 
     @Test

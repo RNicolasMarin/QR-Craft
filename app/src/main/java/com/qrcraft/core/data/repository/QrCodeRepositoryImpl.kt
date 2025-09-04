@@ -6,7 +6,9 @@ import com.qrcraft.core.data.local.entities.toEntity
 import com.qrcraft.core.domain.QrCodeRepository
 import com.qrcraft.scan.domain.QrCode
 import com.qrcraft.scan.domain.ScannedOrGenerated
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 
 class QrCodeRepositoryImpl(
@@ -17,11 +19,27 @@ class QrCodeRepositoryImpl(
         qrCodeDao.upsert(qrCode.toEntity())
     }
 
-    override fun getQrCodes(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>> {
-        return qrCodeDao.getQrCodes(scannedOrGenerated.typeValue).map { list ->
-            list.map { qrCodeEntity ->
-                qrCodeEntity.toDomain()
+    override fun getQrCodesScanned(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>> {
+        return if (scannedOrGenerated == SCANNED) {
+            qrCodeDao.getQrCodes(SCANNED.typeValue).map { list ->
+                list.map { qrCodeEntity ->
+                    qrCodeEntity.toDomain()
+                }
             }
+        } else {
+            emptyFlow()
+        }
+    }
+
+    override fun getQrCodesGenerated(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>> {
+        return if (scannedOrGenerated == GENERATED) {
+            qrCodeDao.getQrCodes(GENERATED.typeValue).map { list ->
+                list.map { qrCodeEntity ->
+                    qrCodeEntity.toDomain()
+                }
+            }
+        } else {
+            emptyFlow()
         }
     }
 }
