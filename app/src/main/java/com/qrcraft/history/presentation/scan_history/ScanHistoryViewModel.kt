@@ -1,0 +1,48 @@
+package com.qrcraft.history.presentation.scan_history
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.qrcraft.core.domain.QrCodeRepository
+import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+class ScanHistoryViewModel(
+    private val repository: QrCodeRepository
+): ViewModel() {
+
+    var state by mutableStateOf(ScanHistoryState())
+        private set
+
+    init {
+        viewModelScope.launch {
+            snapshotFlow { state.scannedOrGenerated }.collectLatest {
+                repository.getQrCodes(
+                    state.scannedOrGenerated
+                ).collectLatest {
+                    state = state.copy(
+                        qrCodes = it
+                    )
+                }
+            }
+        }
+    }
+
+    fun onAction(action: ScanHistoryAction) {
+        when (action) {
+            ChangeScannedOrGeneratedCode -> {
+                state = state.copy(
+                    scannedOrGenerated = when(state.scannedOrGenerated) {
+                        SCANNED -> GENERATED
+                        GENERATED -> SCANNED
+                    }
+                )
+            }
+        }
+    }
+}

@@ -20,10 +20,6 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,14 +32,25 @@ import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ScanHistoryScreenRoot() {
-    ScanHistoryScreen()
+fun ScanHistoryScreenRoot(
+    viewModel: ScanHistoryViewModel = koinViewModel()
+) {
+    ScanHistoryScreen(
+        state = viewModel.state,
+        onAction = { action ->
+            viewModel.onAction(action)
+        }
+    )
 }
 
 @Composable
 fun ScanHistoryScreen(
+    state: ScanHistoryState,
+    onAction: (ScanHistoryAction) -> Unit,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
     Box(
@@ -66,6 +73,8 @@ fun ScanHistoryScreen(
             )
 
             ScanHistoryTabsAndContent(
+                state = state,
+                onAction = onAction,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -99,21 +108,22 @@ fun ScanHistoryScreen(
 
 @Composable
 fun ScanHistoryTabsAndContent(
+    state: ScanHistoryState,
+    onAction: (ScanHistoryAction) -> Unit,
     modifier: Modifier = Modifier,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
     Column(
         modifier = modifier
     ) {
-        var selectedTabIndex by remember { mutableIntStateOf(0) }
         val tabs = listOf(stringResource(R.string.scan_history_tab_scanned), stringResource(R.string.scan_history_tab_generated))
 
         TabRow(
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = state.scannedOrGenerated.typeValue,
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                        .tabIndicatorOffset(tabPositions[state.scannedOrGenerated.typeValue])
                         .height(2.dp)
                         .background(
                             color = MaterialTheme.colorScheme.onSurface,
@@ -135,13 +145,15 @@ fun ScanHistoryTabsAndContent(
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    selected = state.scannedOrGenerated.typeValue == index,
+                    onClick = {
+                        onAction(ChangeScannedOrGeneratedCode)
+                    },
                     text = {
                         Text(
                             text = title,
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (selectedTabIndex == index) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (state.scannedOrGenerated.typeValue == index) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -152,6 +164,7 @@ fun ScanHistoryTabsAndContent(
             color = MaterialTheme.colorScheme.outline,
             thickness = 1.dp
         )
+        Text(text = state.qrCodes.toString())
     }
 }
 
@@ -159,6 +172,11 @@ fun ScanHistoryTabsAndContent(
 @Composable
 private fun ScanHistoryScreenPreview() {
     QRCraftTheme {
-        ScanHistoryScreen()
+        ScanHistoryScreen(
+            state = ScanHistoryState(),
+            onAction = {
+
+            }
+        )
     }
 }

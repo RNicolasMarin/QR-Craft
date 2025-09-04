@@ -37,7 +37,7 @@ sealed class QrCodeType(val typeCode: Int) {
     data object Text: QrCodeType(6)
 }
 
-enum class ScannedOrGenerated {
-    SCANNED,
-    GENERATED
+enum class ScannedOrGenerated(val typeValue: Int) {
+    SCANNED(0),
+    GENERATED(1)
 }

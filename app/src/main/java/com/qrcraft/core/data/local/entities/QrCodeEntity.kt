@@ -2,8 +2,9 @@ package com.qrcraft.core.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.qrcraft.core.domain.QrCodeTypeConverter
 import com.qrcraft.scan.domain.QrCode
-import com.qrcraft.scan.domain.ScannedOrGenerated.*
+import com.qrcraft.scan.domain.ScannedOrGenerated
 import kotlin.String
 
 @Entity(tableName = "qr_codes")
@@ -23,8 +24,14 @@ fun QrCode.toEntity() = QrCodeEntity(
     title = title,
     type = type.typeCode,
     createdAt = createdAt,
-    scannedOrGenerated = when (scannedOrGenerated) {
-        SCANNED -> 1
-        GENERATED -> 2
-    }
+    scannedOrGenerated = scannedOrGenerated.typeValue
+)
+
+fun QrCodeEntity.toDomain() = QrCode(
+    id = id,
+    rawContent = rawContent,
+    title = title,
+    type = QrCodeTypeConverter().convertToType(type, rawContent),
+    createdAt = createdAt,
+    scannedOrGenerated = ScannedOrGenerated.entries.first { it.typeValue == scannedOrGenerated }
 )
