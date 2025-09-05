@@ -9,7 +9,7 @@ import com.qrcraft.core.domain.QrCodeTypeId.WIFI_ID
 import com.qrcraft.scan.domain.ScannedOrGenerated.*
 
 data class QrCode(
-    var id: Int = -1,
+    var id: Int = 0,
     var rawContent: String,
     var title: String = "",
     var type: QrCodeType,

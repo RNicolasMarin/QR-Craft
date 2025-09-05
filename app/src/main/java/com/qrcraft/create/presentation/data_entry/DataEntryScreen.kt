@@ -60,7 +60,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DataEntryScreenRoot(
     qrTypeOrdinal: Int,
     onBackToCreateQr: () -> Unit,
-    onGoToPreview: (String) -> Unit,
+    onGoToPreview: (Int) -> Unit,
     viewModel: DataEntryViewModel = koinViewModel()
 ) {
 
@@ -70,7 +70,7 @@ fun DataEntryScreenRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is GoToPreview -> onGoToPreview(event.content)
+            is GoToPreview -> onGoToPreview(event.qrCodeId)
         }
     }
 

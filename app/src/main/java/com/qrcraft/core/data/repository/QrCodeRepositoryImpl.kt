@@ -15,6 +15,14 @@ class QrCodeRepositoryImpl(
     private val qrCodeDao: QrCodeDao
 ): QrCodeRepository {
 
+    override suspend fun insert(qrCode: QrCode): Int {
+        return qrCodeDao.insert(qrCode.toEntity()).toInt()
+    }
+
+    override suspend fun getQrCode(qrCodeId: Int): QrCode? {
+        return qrCodeDao.getQrCode(qrCodeId)?.toDomain()
+    }
+
     override suspend fun upsert(qrCode: QrCode) {
         qrCodeDao.upsert(qrCode.toEntity())
     }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.qrcraft.core.domain.QrCodeRepository
 import com.qrcraft.create.domain.DataEntryValidator
 import com.qrcraft.create.domain.RawContentGenerator
 import com.qrcraft.create.presentation.create_qr.QrTypeUI.*
@@ -13,13 +14,15 @@ import com.qrcraft.create.presentation.data_entry.DataEntryAction.UpdateQrConten
 import com.qrcraft.create.presentation.data_entry.DataEntryEvent.GoToPreview
 import com.qrcraft.scan.domain.QrCode
 import com.qrcraft.scan.domain.QrCodeType.*
+import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class DataEntryViewModel(
     val dataEntryValidator: DataEntryValidator,
-    val rawContentGenerator: RawContentGenerator
+    val rawContentGenerator: RawContentGenerator,
+    private val repository: QrCodeRepository
 ): ViewModel() {
 
     var state by mutableStateOf(DataEntryState())
@@ -121,11 +124,21 @@ class DataEntryViewModel(
                 )
             }
             is GenerateRawContent -> {
-                state.qrCode?.let {
-                    val content = rawContentGenerator.createContent(it)
-                    viewModelScope.launch {
-                        eventChannel.send(GoToPreview(content))
-                    }
+                val qrCode = state.qrCode ?: return
+                val content = rawContentGenerator.createContent(qrCode)
+                viewModelScope.launch {
+                    val id = repository.insert(
+                        qrCode.copy(
+                            rawContent = content,
+                            createdAt = System.currentTimeMillis(),
+                            scannedOrGenerated = GENERATED
+                        )
+                    )
+                    eventChannel.send(
+                        GoToPreview(
+                            qrCodeId = id
+                        )
+                    )
                 }
             }
             else -> Unit

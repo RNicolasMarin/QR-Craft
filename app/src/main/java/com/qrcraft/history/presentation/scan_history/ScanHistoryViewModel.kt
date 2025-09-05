@@ -54,6 +54,7 @@ class ScanHistoryViewModel(
                     }
                 )
             }
+            else -> Unit
         }
     }
 }

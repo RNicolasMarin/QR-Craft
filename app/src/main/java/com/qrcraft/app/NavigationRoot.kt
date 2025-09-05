@@ -10,7 +10,6 @@ import com.qrcraft.app.Screen.*
 import com.qrcraft.create.presentation.create_qr.CreateQrScreenRoot
 import com.qrcraft.create.presentation.data_entry.DataEntryScreenRoot
 import com.qrcraft.history.presentation.scan_history.ScanHistoryScreenRoot
-import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import com.qrcraft.scan.presentation.scan.ScanScreenRoot
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewScreenRoot
 
@@ -24,8 +23,12 @@ fun NavigationRoot(
     ) {
         composable<Scan> {
             ScanScreenRoot(
-                onScanResultSuccess = { qrContent ->
-                    navController.navigate(ScanResult(qrContent)) {
+                onScanResultSuccess = { qrCodeId ->
+                    navController.navigate(
+                        ScanResult(
+                            qrCodeId = qrCodeId
+                        )
+                    ) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
@@ -40,9 +43,8 @@ fun NavigationRoot(
         composable<ScanResult> {
             val args = it.toRoute<ScanResult>()
             ScanResultPreviewScreenRoot(
-                scannedOrGenerated = SCANNED,
                 titleRes = R.string.scan_result,
-                qrContent = args.qrContent,
+                qrCodeId = args.qrCodeId,
                 onBackPressed = {
                     navController.navigate(Scan) {
                         popUpTo(0) { inclusive = true }
@@ -64,24 +66,35 @@ fun NavigationRoot(
                 onBackToCreateQr = {
                     navController.popBackStack()
                 },
-                onGoToPreview = { content ->
-                    navController.navigate(Preview(content))
+                onGoToPreview = { qrCodeId ->
+                    navController.navigate(
+                        Preview(
+                            qrCodeId = qrCodeId
+                        )
+                    )
                 }
             )
         }
         composable<Preview> {
             val args = it.toRoute<Preview>()
             ScanResultPreviewScreenRoot(
-                scannedOrGenerated = GENERATED,
                 titleRes = R.string.preview,
-                qrContent = args.qrContent,
+                qrCodeId = args.qrCodeId,
                 onBackPressed = {
                     navController.popBackStack()
                 }
             )
         }
         composable<ScanHistory> {
-            ScanHistoryScreenRoot()
+            ScanHistoryScreenRoot(
+                onGoToPreview = { qrCodeId ->
+                    navController.navigate(
+                        Preview(
+                            qrCodeId = qrCodeId
+                        )
+                    )
+                }
+            )
         }
     }
 }

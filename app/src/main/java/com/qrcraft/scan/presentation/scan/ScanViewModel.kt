@@ -5,6 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.qrcraft.core.domain.QrCodeRepository
+import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeTypeDetector
+import com.qrcraft.scan.domain.ScannedOrGenerated.SCANNED
 import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.CloseApp
 import com.qrcraft.scan.presentation.scan.ScanEvent.GoToScanResult
@@ -13,11 +17,13 @@ import com.qrcraft.scan.presentation.scan.ScanEvent.RequestPermissionToSystem
 import com.qrcraft.scan.presentation.scan.ScanEvent.ShowPermissionGrantedSnackBar
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class ScanViewModel: ViewModel() {
+class ScanViewModel(
+    private val qrTypeDetector: QrCodeTypeDetector,
+    private val repository: QrCodeRepository
+): ViewModel() {
 
     var state by mutableStateOf(ScanState())
         private set
@@ -86,11 +92,23 @@ class ScanViewModel: ViewModel() {
                     isScanning = false,
                 )
                 viewModelScope.launch {
-                    delay(1000)
+                    val qrType = qrTypeDetector.getQrCodeType(action.qrContent)
+                    val qrCode = QrCode(
+                        rawContent = action.qrContent,
+                        type = qrType,
+                        createdAt = System.currentTimeMillis(),
+                        scannedOrGenerated = SCANNED
+                    )
+                    val id = repository.insert(qrCode)
+
                     state = state.copy(
                         infoToShow = NONE
                     )
-                    eventChannel.send(GoToScanResult(action.qrContent))
+                    eventChannel.send(
+                        GoToScanResult(
+                            qrCodeId = id
+                        )
+                    )
                 }
             }
 

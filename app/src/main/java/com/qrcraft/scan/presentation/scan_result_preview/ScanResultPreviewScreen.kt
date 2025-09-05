@@ -85,9 +85,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ScanResultPreviewScreenRoot(
-    scannedOrGenerated: ScannedOrGenerated,
     titleRes: Int,
-    qrContent: String,
+    qrCodeId: Int,
     onBackPressed: () -> Unit,
     viewModel: ScanResultPreviewViewModel = koinViewModel()
 ) {
@@ -95,8 +94,7 @@ fun ScanResultPreviewScreenRoot(
     LaunchedEffect(true) {
         viewModel.onAction(
             SetNonSavedQrContent(
-                qrContent = qrContent,
-                scannedOrGenerated = scannedOrGenerated
+                qrCodeId = qrCodeId
             )
         )
     }

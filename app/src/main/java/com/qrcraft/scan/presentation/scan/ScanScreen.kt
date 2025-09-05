@@ -80,7 +80,7 @@ import kotlin.math.min
 
 @Composable
 fun ScanScreenRoot(
-    onScanResultSuccess: (String) -> Unit,
+    onScanResultSuccess: (Int) -> Unit,
     onCreateQr: () -> Unit,
     onScanHistory: () -> Unit,
     viewModel: ScanViewModel = koinViewModel()
@@ -126,7 +126,7 @@ fun ScanScreenRoot(
                 }
             }
 
-            is GoToScanResult -> onScanResultSuccess(event.qrContent)
+            is GoToScanResult -> onScanResultSuccess(event.qrCodeId)
         }
     }
 

@@ -2,6 +2,7 @@ package com.qrcraft.history.presentation.scan_history
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,11 +61,16 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ScanHistoryScreenRoot(
+    onGoToPreview: (Int) -> Unit,
     viewModel: ScanHistoryViewModel = koinViewModel()
 ) {
     ScanHistoryScreen(
         state = viewModel.state,
         onAction = { action ->
+            when (action) {
+                is GoToPreview -> onGoToPreview(action.qrCodeId)
+                else -> Unit
+            }
             viewModel.onAction(action)
         }
     )
@@ -217,10 +223,12 @@ fun ScanHistoryTabsAndContent(
             when (tab) {
                 SCANNED -> ScanHistoryList(
                     qrCodes = state.qrCodesScanned,
+                    onAction = onAction,
                     listState = listStateScanned
                 )
                 GENERATED -> ScanHistoryList(
                     qrCodes = state.qrCodesGenerated,
+                    onAction = onAction,
                     listState = listStateGenerated
                 )
             }
@@ -231,6 +239,7 @@ fun ScanHistoryTabsAndContent(
 @Composable
 fun ScanHistoryList(
     qrCodes: List<QrCode>,
+    onAction: (ScanHistoryAction) -> Unit,
     dimens: Dimens = MaterialTheme.dimen,
     listState: LazyListState
 ) {
@@ -247,6 +256,7 @@ fun ScanHistoryList(
         ) { qrCode ->
             ScanHistoryItem(
                 qrCode = qrCode,
+                onAction = onAction,
                 modifier = Modifier
             )
         }
@@ -259,6 +269,7 @@ fun ScanHistoryList(
 @Composable
 fun ScanHistoryItem(
     qrCode: QrCode,
+    onAction: (ScanHistoryAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiType = QrTypeUI.entries.first { qrCode.type.typeId == it.qrCodeTypeId}
@@ -267,6 +278,14 @@ fun ScanHistoryItem(
         colors = CardDefaults.cardColors(containerColor = SurfaceHigher),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = modifier
+            .combinedClickable(
+                onClick = {
+                    onAction(GoToPreview(qrCode.id))
+                },
+                onLongClick = {
+                    onAction(OpenMoreOptions(qrCode.id))
+                }
+            )
     ) {
         Row(
             modifier = Modifier
@@ -330,7 +349,6 @@ fun ScanHistoryItem(
             }
         }
     }
-
 }
 
 @MultiDevicePreview

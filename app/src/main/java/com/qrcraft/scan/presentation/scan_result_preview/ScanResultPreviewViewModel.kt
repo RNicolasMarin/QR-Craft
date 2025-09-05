@@ -6,13 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qrcraft.core.domain.QrCodeRepository
-import com.qrcraft.scan.domain.QrCode
-import com.qrcraft.scan.domain.QrCodeTypeDetector
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import kotlinx.coroutines.launch
 
 class ScanResultPreviewViewModel(
-    private val qrTypeDetector: QrCodeTypeDetector,
     private val repository: QrCodeRepository
 ) : ViewModel() {
 
@@ -22,14 +19,15 @@ class ScanResultPreviewViewModel(
     fun onAction(action: ScanResultPreviewAction) {
         when (action) {
             is SetNonSavedQrContent -> {
-                val qrType = qrTypeDetector.getQrCodeType(action.qrContent)
-                state = state.copy(
-                    qrType = QrCode(
-                        rawContent = action.qrContent,
-                        scannedOrGenerated = action.scannedOrGenerated,
-                        type = qrType
-                    )
-                )
+                viewModelScope.launch {
+                    val result = repository.getQrCode(action.qrCodeId)
+
+                    result?.let {
+                        state = state.copy(
+                            qrType = result
+                        )
+                    }
+                }
             }
 
             is UpdateTitle -> {
@@ -51,9 +49,7 @@ class ScanResultPreviewViewModel(
             OnScreenRemoved -> {
                 viewModelScope.launch {
                     state.qrType?.let {
-                        repository.upsert(it.copy(
-                            createdAt = System.currentTimeMillis()
-                        ))
+                        repository.upsert(it)
                     }
                 }
             }

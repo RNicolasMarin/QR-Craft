@@ -11,7 +11,7 @@ sealed interface ScanEvent {
     data object ShowPermissionGrantedSnackBar : ScanEvent
 
     data class GoToScanResult(
-        val qrContent: String
+        val qrCodeId: Int
     ) : ScanEvent
 
 }

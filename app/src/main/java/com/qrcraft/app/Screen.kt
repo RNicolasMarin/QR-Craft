@@ -9,7 +9,7 @@ sealed class Screen {
 
     @Serializable
     data class ScanResult(
-        val qrContent: String
+        val qrCodeId: Int
     ): Screen()
 
     @Serializable
@@ -22,7 +22,7 @@ sealed class Screen {
 
     @Serializable
     data class Preview(
-        val qrContent: String
+        val qrCodeId: Int
     ): Screen()
 
     @Serializable
