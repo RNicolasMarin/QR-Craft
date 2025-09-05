@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -63,12 +64,14 @@ import com.qrcraft.core.presentation.formatTimestamp
 import com.qrcraft.create.presentation.create_qr.QrTypeUI
 import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
 import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import com.qrcraft.scan.presentation.util.getFormattedContentHistory
 import com.qrcraft.scan.presentation.util.getFormattedContentResultPreview
 import com.qrcraft.scan.presentation.util.shareContent
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.Int
 
 @Composable
 fun ScanHistoryScreenRoot(
@@ -180,13 +183,14 @@ fun ScanHistoryScreen(
                     dragHandle = null,
                     containerColor = SurfaceHigher,
                     shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .widthIn(0.dp, 412.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = dimens.paddingStart, end = dimens.paddingEnd, top = 8.dp, bottom = 8.dp)
+                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                     ) {
                         val qrContent = state.selectedQrCode?.getFormattedContentResultPreview()
                         ScanHistoryBottomSheetOption(
@@ -253,6 +257,7 @@ fun ScanHistoryTabsAndContent(
     dimens: Dimens = MaterialTheme.dimen,
 ) {
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
         val tabs = listOf(stringResource(R.string.scan_history_tab_scanned), stringResource(R.string.scan_history_tab_generated))
@@ -337,7 +342,7 @@ fun ScanHistoryList(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
-            .fillMaxWidth()
+            .widthIn(0.dp, 552.dp)
             .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
     ) {
         items(
