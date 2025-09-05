@@ -1,5 +1,7 @@
 package com.qrcraft.history.presentation.scan_history
 
+import com.qrcraft.scan.domain.QrCode
+
 sealed interface ScanHistoryAction {
 
     data object ChangeScannedOrGeneratedCode: ScanHistoryAction
@@ -9,7 +11,15 @@ sealed interface ScanHistoryAction {
     ): ScanHistoryAction
 
     data class OpenMoreOptions(
-        val qrCodeId: Int
+        val qrCode: QrCode
     ): ScanHistoryAction
+
+    data object CloseMoreOptions: ScanHistoryAction
+
+    data class ShareContent(
+        val qrContent: String
+    ): ScanHistoryAction
+
+    data object DeleteQrCode: ScanHistoryAction
 
 }

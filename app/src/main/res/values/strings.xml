@@ -46,5 +46,7 @@
     <string name="scan_history_tab_scanned">Scanned</string>
     <string name="scan_history_tab_generated">Generated</string>
     <string name="scan_history_empty_field">…</string>
+    <string name="scan_history_options_share">Share</string>
+    <string name="scan_history_options_delete">Delete</string>
 
 </resources>

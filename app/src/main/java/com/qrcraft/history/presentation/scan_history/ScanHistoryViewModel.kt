@@ -54,6 +54,26 @@ class ScanHistoryViewModel(
                     }
                 )
             }
+            is OpenMoreOptions -> {
+                state = state.copy(
+                    selectedQrCode = action.qrCode
+                )
+            }
+            is CloseMoreOptions -> {
+                state = state.copy(
+                    selectedQrCode = null
+                )
+            }
+            is DeleteQrCode -> {
+                viewModelScope.launch {
+                    state.selectedQrCode?.let {
+                        repository.delete(it)
+                    }
+                    state = state.copy(
+                        selectedQrCode = null
+                    )
+                }
+            }
             else -> Unit
         }
     }

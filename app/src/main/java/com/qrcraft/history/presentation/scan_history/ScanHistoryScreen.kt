@@ -1,7 +1,10 @@
 package com.qrcraft.history.presentation.scan_history
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -23,8 +27,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -35,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +66,8 @@ import com.qrcraft.scan.domain.QrCode
 import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import com.qrcraft.scan.presentation.util.getFormattedContentHistory
+import com.qrcraft.scan.presentation.util.getFormattedContentResultPreview
+import com.qrcraft.scan.presentation.util.shareContent
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -64,11 +75,16 @@ fun ScanHistoryScreenRoot(
     onGoToPreview: (Int) -> Unit,
     viewModel: ScanHistoryViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
+
     ScanHistoryScreen(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
                 is GoToPreview -> onGoToPreview(action.qrCodeId)
+                is ShareContent -> {
+                    context.shareContent(action.qrContent)
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -76,6 +92,7 @@ fun ScanHistoryScreenRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanHistoryScreen(
     state: ScanHistoryState,
@@ -152,6 +169,79 @@ fun ScanHistoryScreen(
                 )
             }
         }
+
+        if (state.selectedQrCode != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                ModalBottomSheet(
+                    onDismissRequest = { onAction(CloseMoreOptions) },
+                    dragHandle = null,
+                    containerColor = SurfaceHigher,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = dimens.paddingStart, end = dimens.paddingEnd, top = 8.dp, bottom = 8.dp)
+                    ) {
+                        val qrContent = state.selectedQrCode?.getFormattedContentResultPreview()
+                        ScanHistoryBottomSheetOption(
+                            iconRes = R.drawable.ic_share,
+                            textRes = R.string.scan_history_options_share,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            onClick = {
+                                qrContent?.let {
+                                    onAction(ShareContent(qrContent))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        ScanHistoryBottomSheetOption(
+                            iconRes = R.drawable.ic_delete,
+                            textRes = R.string.scan_history_options_delete,
+                            color = MaterialTheme.colorScheme.error,
+                            onClick = { onAction(DeleteQrCode) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ScanHistoryBottomSheetOption(
+    @DrawableRes iconRes: Int,
+    @StringRes textRes: Int,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            tint = color,
+            contentDescription = stringResource(textRes),
+            modifier = Modifier
+                .size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = stringResource(textRes),
+            style = MaterialTheme.typography.labelLarge,
+            color = color,
+        )
     }
 }
 
@@ -283,7 +373,7 @@ fun ScanHistoryItem(
                     onAction(GoToPreview(qrCode.id))
                 },
                 onLongClick = {
-                    onAction(OpenMoreOptions(qrCode.id))
+                    onAction(OpenMoreOptions(qrCode))
                 }
             )
     ) {

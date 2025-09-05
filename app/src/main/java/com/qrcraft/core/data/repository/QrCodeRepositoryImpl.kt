@@ -27,6 +27,10 @@ class QrCodeRepositoryImpl(
         qrCodeDao.upsert(qrCode.toEntity())
     }
 
+    override suspend fun delete(qrCode: QrCode) {
+        qrCodeDao.delete(qrCode.toEntity())
+    }
+
     override fun getQrCodesScanned(scannedOrGenerated: ScannedOrGenerated): Flow<List<QrCode>> {
         return if (scannedOrGenerated == SCANNED) {
             qrCodeDao.getQrCodes(SCANNED.typeValue).map { list ->
