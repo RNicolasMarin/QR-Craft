@@ -1,21 +1,21 @@
 
 # QR Craft
 
-An Android application built with Jetpack Compose for scanning QR codes. Created as Milestone 1 and 2 of the August–September App Challenge on Philipp Lackner’s Mobile Dev Campus.
+An Android application built with Jetpack Compose for scanning QR codes. Created as Milestone 1, 2 and 3 of the August–September App Challenge on Philipp Lackner’s Mobile Dev Campus.
 
 <img width="885" height="183" alt="Github Readme Logo QR Craft" src="https://github.com/user-attachments/assets/0b3e12a8-5f41-4bc5-a0a9-a7457f607010" />
 
 ## Features
 
-In Milestone 2, the application consists of the following features:
+In Milestone 3, the application consists of the following features:
 - Splash Screen: Displays the app icon.
   
 <img width="350" height="2270" alt="Screenshot_20250816_165820" src="https://github.com/user-attachments/assets/5e48a93d-9461-4a96-9838-f2c859e584a2" />
   
-- Scan Screen: Requests camera permission using a custom dialog. If granted, it shows the camera preview with a frame for QR code detection. Once a QR code is recognized, it navigates to the next screen.
+- Scan Screen: Requests camera permission using a custom dialog. If granted, it shows the camera preview with a frame for QR code detection. Once a QR code is recognized, is saved internally and it navigates to the next screen.
 <img width="350" height="2270" alt="Screenshot_20250828_200155" src="https://github.com/user-attachments/assets/fedadc4b-925c-428c-b447-78008d74727b" />
 
-- Scan Result Screen: Displays the scanned QR code and its data in the appropriate format. The app supports links, contacts, phone numbers, geolocations, Wi-Fi credentials, and plain text. Depending on the type, additional features are available—for example, tapping a link opens it in the browser, or long text (more than 6 lines) can be expanded/collapsed with a “Show more/less” button. This screen also includes Share and Copy actions.
+- Scan Result Screen: Displays the scanned QR code and its data in the appropriate format. The app supports links, contacts, phone numbers, geolocations, Wi-Fi credentials, and plain text. Depending on the type, additional features are available—for example, tapping a link opens it in the browser, or long text (more than 6 lines) can be expanded/collapsed with a “Show more/less” button. This screen also includes Share and Copy actions and allows to edit a title or use the QR Code type as a default title (which would be saved when navigating to the previous screen).
 
 <img width="350" height="2270" alt="Screenshot_20250816_170209" src="https://github.com/user-attachments/assets/f57c24cd-5e4f-469a-98fb-1644848c16bb" />
 
@@ -23,13 +23,24 @@ In Milestone 2, the application consists of the following features:
 
 <img width="350" height="2270" alt="Screenshot_20250828_200553" src="https://github.com/user-attachments/assets/30df55bf-8feb-4b49-a3b8-138cc0460a93" />
 
-- Data Entry Screen: After selecting a QR Code type, this screen allows you to enter the required information specific to that type.
+- Data Entry Screen: After selecting a QR Code type, this screen allows you to enter the required information specific to that type and then save it internally, navigating to the next screen.
 
 <img width="350" height="2270" alt="Screenshot_20250828_200655" src="https://github.com/user-attachments/assets/511e7c46-3e77-42ac-96a8-211ac5335e44" />
 
-- QR Code Preview: This screen is similar to the Scan Result Screen, but with a different title. It provides the same functionalities.
+- Preview Screen: This screen is similar to the Scan Result Screen, but with a different title. It provides the same functionalities.
 
 <img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/59a16517-d13b-432b-998f-aeca086ebed9" />
+
+- Scan History Screen: it shows a tab with all the QR Codes locally saved that were scanned and that were generated. For each QR Code shows an icon according to its type, its title (custom or default), a preview of its content and the time of creation.
+
+<img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/77a4cc21-7ecd-4932-9b23-4632167e438e" />
+
+This screen also allows the next action:
+- Tap: Open the Preview Screen
+- Long Press: Opesn a bottom sheet with the options to Share (opens the system share sheet) and Delete (removes the item from history).
+
+<img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/267b5207-3dae-4df3-8faa-2f91cbc242e1" />
+
 
 ## Built with
 
@@ -49,9 +60,10 @@ In Milestone 2, the application consists of the following features:
 * **CameraX**: displays the device’s camera feed within the app..
 * **ML Kit Barcode Scanning**: detects and extracts content from QR codes.
 * **ZXing**: generates QR codes from text and other data formats.
+* **Room**: library for local SQLite database.
 
 ## Roadmap
-I will begin working on Milestone 3 at the beginning of September. After that, there will be one final milestone.
+I will begin working on Milestone 4 in the middle of September. Except for some minor improvements that would be the last version for this app.
 
 ## Feedback
 
