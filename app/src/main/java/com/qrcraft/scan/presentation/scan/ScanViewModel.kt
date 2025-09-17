@@ -17,6 +17,7 @@ import com.qrcraft.scan.presentation.scan.ScanEvent.RequestPermissionToSystem
 import com.qrcraft.scan.presentation.scan.ScanEvent.ShowPermissionGrantedSnackBar
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -84,6 +85,12 @@ class ScanViewModel(
                     isScanning = false,
                     infoToShow = NO_QR_FOUND
                 )
+                viewModelScope.launch {
+                    delay(5000)
+                    if (state.infoToShow == NO_QR_FOUND) {
+                        onAction(ScannerRestartRunning)
+                    }
+                }
             }
             is ScannerSuccess -> {
                 if (!state.isScanning) return
@@ -92,6 +99,7 @@ class ScanViewModel(
                     isScanning = false,
                 )
                 viewModelScope.launch {
+                    delay(300)
                     val qrType = qrTypeDetector.getQrCodeType(action.qrContent)
                     val qrCode = QrCode(
                         rawContent = action.qrContent,
@@ -134,7 +142,7 @@ class ScanViewModel(
                 )
             }
 
-            OnCreateQr, OnScanHistory -> Unit
+            OnCreateQr, OnScanHistory, PickImage -> Unit
         }
     }
 

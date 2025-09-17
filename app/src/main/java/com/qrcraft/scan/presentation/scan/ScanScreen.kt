@@ -3,6 +3,10 @@ package com.qrcraft.scan.presentation.scan
 import android.Manifest
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -68,6 +72,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -83,13 +88,19 @@ import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.presentation.scan.ScanAction.*
+import com.qrcraft.scan.presentation.scan.ScanAction.ScannerQrNotFound
 import com.qrcraft.scan.presentation.scan.ScanEvent.*
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
 import com.qrcraft.scan.presentation.util.hasCameraPermission
 import com.qrcraft.scan.presentation.util.openAppSettings
 import com.qrcraft.scan.presentation.util.yuvToRgb
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
+import kotlin.coroutines.resumeWithException
 import kotlin.math.min
 
 @Composable
@@ -109,7 +120,7 @@ fun ScanScreenRoot(
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(
+    val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         Log.d("QRCraft Permission", "isGranted: $isGranted")
@@ -122,13 +133,58 @@ fun ScanScreenRoot(
         )
     }
 
+    val options = BarcodeScannerOptions.Builder()
+        .setBarcodeFormats(
+            Barcode.FORMAT_QR_CODE,
+            Barcode.FORMAT_AZTEC
+        )
+        .build()
+    val scanner = remember { BarcodeScanning.getClient(options) }
+
+    var imagePickedResult by remember { mutableStateOf<ImagePickedResult>(ImagePickedResult.Idle) }
+
+    LaunchedEffect(imagePickedResult) {
+        val uriResult = imagePickedResult
+        when (uriResult) {
+            ImagePickedResult.Idle -> Unit
+            ImagePickedResult.Error -> {
+                viewModel.onAction(ScannerQrNotFound)
+            }
+            is ImagePickedResult.Success -> {
+                viewModel.onAction(ScannerLoading)
+                withContext(Dispatchers.Default) {
+                    val bitmap = uriToBitmap(context, uriResult.uri)
+                    if (bitmap == null) {
+                        viewModel.onAction(ScannerQrNotFound)
+                        return@withContext
+                    }
+                    val image = InputImage.fromBitmap(bitmap, 0)
+
+                    try {
+                        val barcodes = scanner.process(image).awaitResult()
+                        val value = barcodes.firstOrNull()?.rawValue
+                        val action = if (value != null) ScannerSuccess(value) else ScannerQrNotFound
+                        viewModel.onAction(action)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        viewModel.onAction(ScannerQrNotFound)
+                    }
+                }
+            }
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imagePickedResult = if (uri != null) ImagePickedResult.Success(uri) else ImagePickedResult.Error
+    }
+
     val grantedMessage = stringResource(R.string.camera_permission_snack_bar_granted)
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             CloseApp -> activity.finish()
 
-            RequestPermissionToSystem -> launcher.launch(Manifest.permission.CAMERA)
+            RequestPermissionToSystem -> cameraLauncher.launch(Manifest.permission.CAMERA)
 
             OpenAppSettings -> context.openAppSettings()
 
@@ -152,6 +208,9 @@ fun ScanScreenRoot(
             when (action) {
                 OnCreateQr -> onCreateQr()
                 OnScanHistory -> onScanHistory()
+                PickImage -> {
+                    launcher.launch("image/*")
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -191,13 +250,17 @@ fun ScanScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(top = statusBarHeight() + 20.dp, start = 24.dp, end = 24.dp, bottom = 30.dp)
+                    .padding(
+                        top = statusBarHeight() + 20.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 30.dp
+                    )
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val isOn = true
                     TopIconButton(
                         background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
                         iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
@@ -208,7 +271,9 @@ fun ScanScreen(
                     TopIconButton(
                         background = SurfaceHigher,
                         iconRes = R.drawable.ic_image_picker,
-                        onClick = {}
+                        onClick = {
+                            onAction(PickImage)
+                        }
                     )
                 }
                 Text(
@@ -616,4 +681,36 @@ private fun DrawScope.drawScanFrameRemoveSomeYellowPart(
         topLeft = topLeft,
         size = rectSize,
     )
+}
+
+suspend fun uriToBitmap(context: android.content.Context, uri: Uri): Bitmap? {
+    return withContext(Dispatchers.IO) {
+        try {
+            if (Build.VERSION.SDK_INT >= 28) {
+                val source = ImageDecoder.createSource(context.contentResolver, uri)
+                ImageDecoder.decodeBitmap(source)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+}
+
+sealed class ImagePickedResult {
+    data object Idle: ImagePickedResult()
+    data object Error: ImagePickedResult()
+    data class Success(
+        val uri: Uri
+    ): ImagePickedResult()
+}
+
+@kotlin.OptIn(ExperimentalCoroutinesApi::class)
+suspend fun <T> Task<T>.awaitResult(): T = suspendCancellableCoroutine { cont ->
+    addOnSuccessListener { result -> cont.resume(result, onCancellation = { cont.cancel() }) }
+    addOnFailureListener { exc -> cont.resumeWithException(exc) }
+    addOnCanceledListener { cont.cancel() }
 }

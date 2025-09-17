@@ -34,4 +34,6 @@ sealed interface ScanAction {
         val flashOn: Boolean? = null
     ): ScanAction
 
+    data object PickImage: ScanAction
+
 }
