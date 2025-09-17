@@ -23,7 +23,7 @@ interface QrCodeDao {
     @Delete
     suspend fun delete(qrCode: QrCodeEntity)
 
-    @Query("SELECT * FROM qr_codes WHERE scannedOrGenerated = :typeValue")
+    @Query("SELECT * FROM qr_codes WHERE scannedOrGenerated = :typeValue ORDER BY isFavourite DESC, createdAt DESC")
     fun getQrCodes(typeValue: Int): Flow<List<QrCodeEntity>>
 
 }
