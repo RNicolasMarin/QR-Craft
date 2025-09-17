@@ -24,6 +24,7 @@
     <string name="qr_type_text_show_less">Show less</string>
     <string name="scan_result_share">Share</string>
     <string name="scan_result_copy">Copy</string>
+    <string name="scan_result_save">Save</string>
     <string name="scan_result_copied">Copied to clipboard</string>
 
     <string name="create_qr_title">Create QR</string>

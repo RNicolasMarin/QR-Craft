@@ -26,11 +26,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -332,8 +331,8 @@ fun ScanResultScannedContent(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         ScanResultScannedContentActionButton(
-                            modifier = Modifier.weight(1f),
-                            textRes = R.string.scan_result_share,
+                            modifier = Modifier.size(44.dp),
+                            textRes = null,
                             iconRes = R.drawable.ic_share,
                             onClick = { onAction(ShareContent(formattedContent)) }
                         )
@@ -341,10 +340,19 @@ fun ScanResultScannedContent(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         ScanResultScannedContentActionButton(
-                            modifier = Modifier.weight(1f),
-                            textRes = R.string.scan_result_copy,
+                            modifier = Modifier.size(44.dp),
+                            textRes = null,
                             iconRes = R.drawable.ic_copy,
                             onClick = { onAction(CopyContent(formattedContent)) }
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        ScanResultScannedContentActionButton(
+                            modifier = Modifier.weight(1f).size(44.dp),
+                            textRes = R.string.scan_result_save,
+                            iconRes = R.drawable.ic_save,
+                            onClick = { }//onAction(CopyContent(formattedContent)) }
                         )
                     }
                 }
@@ -380,37 +388,37 @@ fun ScanResultScannedContent(
 @Composable
 fun ScanResultScannedContentActionButton(
     modifier: Modifier = Modifier,
-    @StringRes textRes: Int,
+    @StringRes textRes: Int?,
     @DrawableRes iconRes: Int,
     onClick: () -> Unit
 ) {
-    Button(
+    Surface(
         shape = RoundedCornerShape(100.dp),
-        colors = ButtonDefaults.buttonColors().copy(
-            containerColor = SurfaceHigher
-        ),
+        color = SurfaceHigher,
         onClick = onClick,
         modifier = modifier
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(6.dp)
+            modifier = Modifier.padding(12.dp)
         ) {
             Icon(
                 painter = painterResource(id = iconRes),
                 tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = stringResource(textRes),
+                contentDescription = textRes?.let { stringResource(it) } ?: run { "Icon" },
                 modifier = Modifier.size(16.dp)
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            textRes?.let {
+                Spacer(modifier = Modifier.width(8.dp))
 
-            Text(
-                text = stringResource(textRes),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+                Text(
+                    text = stringResource(textRes),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
