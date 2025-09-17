@@ -410,15 +410,37 @@ fun ScanHistoryItem(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                val title = qrCode.title.ifBlank { stringResource(uiType.textRes) }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    val title = qrCode.title.ifBlank { stringResource(uiType.textRes) }
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    val iconRes = if (qrCode.isFavourite) {
+                        R.drawable.ic_favourite_small_checked
+                    } else {
+                        R.drawable.ic_favourite_small_unchecked
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Icon(
+                        painter = painterResource(id = iconRes),
+                        tint = Color.Unspecified,
+                        contentDescription = "Favorite Icon",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(4.dp))
 
