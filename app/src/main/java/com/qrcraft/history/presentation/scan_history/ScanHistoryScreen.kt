@@ -55,6 +55,7 @@ import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
+import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
@@ -64,7 +65,6 @@ import com.qrcraft.core.presentation.formatTimestamp
 import com.qrcraft.create.presentation.create_qr.QrTypeUI
 import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
 import com.qrcraft.scan.domain.QrCode
-import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import com.qrcraft.scan.presentation.util.getFormattedContentHistory
@@ -338,25 +338,38 @@ fun ScanHistoryList(
     dimens: Dimens = MaterialTheme.dimen,
     listState: LazyListState
 ) {
-    LazyColumn(
-        state = listState,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .widthIn(0.dp, 552.dp)
-            .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
-    ) {
-        items(
-            items = qrCodes,
-            key = { qrCode -> qrCode.id }
-        ) { qrCode ->
-            ScanHistoryItem(
-                qrCode = qrCode,
-                onAction = onAction,
-                modifier = Modifier
+    if (qrCodes.isEmpty()) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = stringResource(R.string.scan_history_empty),
+                style = MaterialTheme.typography.labelLarge,
+                color = Grey2,
             )
         }
-        item {
-            Spacer(modifier = Modifier.height(dimens.bottomBar.scanOuter))
+    } else {
+        LazyColumn(
+            state = listState,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .widthIn(0.dp, 552.dp)
+                .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
+        ) {
+            items(
+                items = qrCodes,
+                key = { qrCode -> qrCode.id }
+            ) { qrCode ->
+                ScanHistoryItem(
+                    qrCode = qrCode,
+                    onAction = onAction,
+                    modifier = Modifier
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(dimens.bottomBar.scanOuter))
+            }
         }
     }
 }
