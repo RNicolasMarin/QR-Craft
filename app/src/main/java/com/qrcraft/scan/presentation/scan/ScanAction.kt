@@ -26,4 +26,12 @@ sealed interface ScanAction {
     data object OnCreateQr: ScanAction
     data object OnScanHistory: ScanAction
 
+    data class TryToggleFlashlight(
+        val isCheckingAvailable: Boolean
+    ): ScanAction
+
+    data class ToggleFlashlight(
+        val flashOn: Boolean? = null
+    ): ScanAction
+
 }

@@ -119,6 +119,21 @@ class ScanViewModel(
                 )
             }
 
+            is TryToggleFlashlight -> {
+                val isCheckingAvailable = action.isCheckingAvailable
+                state = state.copy(
+                    isCheckingAvailable = isCheckingAvailable
+                )
+            }
+
+            is ToggleFlashlight -> {
+                val isFlashOn = action.flashOn ?: !state.isFlashOn
+                state = state.copy(
+                    isCheckingAvailable = false,
+                    isFlashOn = isFlashOn
+                )
+            }
+
             OnCreateQr, OnScanHistory -> Unit
         }
     }

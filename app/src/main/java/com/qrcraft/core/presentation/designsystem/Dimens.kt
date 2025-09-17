@@ -4,11 +4,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class Dimens(
+    val scan: DimensScan,
     val scanResult: DimensScanResult,
     val createQr: DimensCreateQr,
     val dataEntry: DimensDataEntry,
     val topBar: DimensTopBar,
     val bottomBar: DimensBottomBar
+)
+
+data class DimensScan(
+    val iconButtonSize: Dp
 )
 
 data class DimensScanResult(
@@ -55,6 +60,9 @@ val dimensMobile = Dimens(
         spaceBetween = 80.dp,
         scanOuter = 64.dp,
     ),
+    scan = DimensScan(
+        iconButtonSize = 44.dp
+    ),
     scanResult = DimensScanResult(
         scannedContent = DimensScanResultScannedContent(
             qr = 160.dp,
@@ -83,6 +91,9 @@ val dimensWider = Dimens(
         padding = 8.dp,
         spaceBetween = 72.dp,
         scanOuter = 72.dp,
+    ),
+    scan = DimensScan(
+        iconButtonSize = 48.dp
     ),
     scanResult = DimensScanResult(
         scannedContent = DimensScanResultScannedContent(

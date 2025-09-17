@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -16,8 +17,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -29,7 +32,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -38,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -51,6 +58,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -58,16 +66,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
+import com.qrcraft.core.presentation.designsystem.DimensScan
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
+import com.qrcraft.core.presentation.designsystem.SurfaceHigher
+import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanEvent.*
 import com.qrcraft.scan.presentation.scan.ScanInfoToShow.*
@@ -165,19 +179,38 @@ fun ScanScreen(
             onAction = onAction
         )
 
-        //Frame, label, snackbar
+        //Frame, label, snackbar, bottom navigation bar,
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f))
         ) {
-            Box(
-                contentAlignment = Alignment.BottomCenter,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(bottom = 30.dp)
+                    .padding(top = statusBarHeight() + 20.dp, start = 24.dp, end = 24.dp, bottom = 30.dp)
             ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val isOn = true
+                    TopIconButton(
+                        background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
+                        iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
+                        onClick = {
+                            onAction(TryToggleFlashlight(true))
+                        }
+                    )
+                    TopIconButton(
+                        background = SurfaceHigher,
+                        iconRes = R.drawable.ic_image_picker,
+                        onClick = {}
+                    )
+                }
                 Text(
                     text = stringResource(R.string.point_your_camera),
                     style = MaterialTheme.typography.titleSmall,
@@ -290,6 +323,30 @@ fun ScanScreen(
 }
 
 @Composable
+fun TopIconButton(
+    background: Color,
+    iconRes: Int,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    dimens: DimensScan = MaterialTheme.dimen.scan
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .size(dimens.iconButtonSize)
+            .background(background, shape = RoundedCornerShape(100.dp))
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            tint = MaterialTheme.colorScheme.onSurface,
+            contentDescription = "Icon",
+            modifier = Modifier
+                .size(16.dp)
+        )
+    }
+}
+
+@Composable
 fun MyCustomSnackBarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier
@@ -319,6 +376,17 @@ fun QRCodeScanner(
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
     var lastTime by remember { mutableLongStateOf(0L) }
+    var camera by remember { mutableStateOf<Camera?>(null) }
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) {
+                    onAction(ToggleFlashlight(false))
+                }
+            }
+        )
+    }
 
     when (state.permissionGranted) {
         true -> {
@@ -405,14 +473,19 @@ fun QRCodeScanner(
                     }
 
                     cameraProviderFuture.get().unbindAll()
-                    cameraProviderFuture.get().bindToLifecycle(
+                    camera = cameraProviderFuture.get().bindToLifecycle(
                         lifecycleOwner,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
                         analysisUseCase
                     )
 
+                    camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
+
                     previewView
+                },
+                update = {
+                    camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
                 },
                 modifier = modifier
             )
@@ -426,6 +499,27 @@ fun QRCodeScanner(
             }
         }
         null -> {}
+    }
+}
+
+fun Camera.checkIfCanTurnOnOfOff(
+    isTrying: Boolean?,
+    isOn: Boolean,
+    onAction: (ScanAction) -> Unit
+) {
+    when (isTrying) {
+        true -> {
+            val available = cameraInfo.hasFlashUnit()
+            if (available) {
+                onAction(ToggleFlashlight(!isOn))
+            } else {
+                onAction(TryToggleFlashlight(false))
+            }
+        }
+        false -> {
+            cameraControl.enableTorch(isOn)
+        }
+        null -> Unit
     }
 }
 
