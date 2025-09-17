@@ -22,4 +22,8 @@ sealed interface ScanHistoryAction {
 
     data object DeleteQrCode: ScanHistoryAction
 
+    data class CheckUncheckFavourite(
+        val qrCode: QrCode
+    ): ScanHistoryAction
+
 }

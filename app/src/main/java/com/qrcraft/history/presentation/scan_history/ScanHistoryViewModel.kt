@@ -74,6 +74,17 @@ class ScanHistoryViewModel(
                     )
                 }
             }
+            is CheckUncheckFavourite -> {
+                viewModelScope.launch {
+                    val qrCode = action.qrCode
+
+                    repository.upsert(
+                        qrCode.copy(
+                            isFavourite = !qrCode.isFavourite
+                        )
+                    )
+                }
+            }
             else -> Unit
         }
     }

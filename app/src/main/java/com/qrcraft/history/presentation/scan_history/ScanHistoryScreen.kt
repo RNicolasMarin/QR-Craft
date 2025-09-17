@@ -437,7 +437,11 @@ fun ScanHistoryItem(
                         painter = painterResource(id = iconRes),
                         tint = Color.Unspecified,
                         contentDescription = "Favorite Icon",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clickable(onClick = {
+                                onAction(CheckUncheckFavourite(qrCode))
+                            })
                     )
                 }
 
