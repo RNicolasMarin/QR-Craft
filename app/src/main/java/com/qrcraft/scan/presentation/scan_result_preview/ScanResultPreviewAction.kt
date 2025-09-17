@@ -26,4 +26,6 @@ sealed interface ScanResultPreviewAction {
 
     data object OnScreenRemoved : ScanResultPreviewAction
 
+    data object CheckUncheckFavourite: ScanResultPreviewAction
+
 }

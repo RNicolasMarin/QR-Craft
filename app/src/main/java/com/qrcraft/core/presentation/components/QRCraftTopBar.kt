@@ -1,5 +1,6 @@
 package com.qrcraft.core.presentation.components
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,8 @@ fun QRCraftTopBar(
     @StringRes titleRes: Int,
     color: Color,
     onBackClicked: (() -> Unit)? = null,
+    @DrawableRes rightIconRes: Int? = null,
+    onClickRightIcon: (() -> Unit)? = null,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
     Column(
@@ -72,9 +75,28 @@ fun QRCraftTopBar(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(
-                modifier = Modifier.width(dimens.spaceEnd)
-            )
+
+            if (rightIconRes != null) {
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                val mod = if (onClickRightIcon != null) {
+                    Modifier.size(24.dp).clickable(onClick = onClickRightIcon)
+                } else {
+                    Modifier.size(24.dp)
+                }
+                Icon(
+                    painter = painterResource(id = rightIconRes),
+                    tint = color,
+                    contentDescription = "Right Icon",
+                    modifier = mod
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier.width(dimens.spaceEnd)
+                )
+            }
         }
     }
 }

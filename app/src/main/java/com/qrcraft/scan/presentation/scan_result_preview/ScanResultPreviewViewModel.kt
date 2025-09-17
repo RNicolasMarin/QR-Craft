@@ -24,7 +24,7 @@ class ScanResultPreviewViewModel(
 
                     result?.let {
                         state = state.copy(
-                            qrType = result
+                            qrCode = result
                         )
                     }
                 }
@@ -37,10 +37,10 @@ class ScanResultPreviewViewModel(
                     else -> action.title
                 }
 
-                if (state.qrType?.title == newTitle) return
+                if (state.qrCode?.title == newTitle) return
 
                 state = state.copy(
-                    qrType = state.qrType?.copy(
+                    qrCode = state.qrCode?.copy(
                         title = newTitle
                     )
                 )
@@ -48,10 +48,19 @@ class ScanResultPreviewViewModel(
 
             OnScreenRemoved -> {
                 viewModelScope.launch {
-                    state.qrType?.let {
+                    state.qrCode?.let {
                         repository.upsert(it)
                     }
                 }
+            }
+
+            CheckUncheckFavourite -> {
+                val qrCode = state.qrCode ?: return
+                state = state.copy(
+                    qrCode = qrCode.copy(
+                        isFavourite = !qrCode.isFavourite
+                    )
+                )
             }
 
             else -> Unit

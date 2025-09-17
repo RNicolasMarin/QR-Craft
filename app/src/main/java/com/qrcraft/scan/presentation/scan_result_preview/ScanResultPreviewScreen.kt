@@ -72,7 +72,6 @@ import com.qrcraft.core.presentation.designsystem.rememberKeyboardVisibility
 import com.qrcraft.scan.domain.QrCode
 import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
-import com.qrcraft.scan.domain.ScannedOrGenerated
 import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
 import com.qrcraft.scan.presentation.util.copyContent
@@ -156,7 +155,13 @@ fun ScanResultPreviewScreen(
             color = OnOverlay,
             titleRes = titleRes,
             modifier = Modifier.fillMaxWidth(),
-            onBackClicked = { onAction(GoBack) }
+            rightIconRes = if (state.qrCode?.isFavourite == true) R.drawable.ic_favourite_checked else R.drawable.ic_favourite_unchecked,
+            onClickRightIcon = {
+                onAction(CheckUncheckFavourite)
+            },
+            onBackClicked = {
+                onAction(GoBack)
+            }
         )
 
         Spacer(modifier = Modifier.height(44.dp))
@@ -178,7 +183,7 @@ fun ScanResultScannedContent(
 ) {
     var textState by remember { mutableStateOf(TEXT_SHORT) }
 
-    val rawContent = state.qrType?.rawContent
+    val rawContent = state.qrCode?.rawContent
     val qrBitmap = remember(rawContent) { rawContent?.let { generateQrCode(it) } }
 
     Box(
@@ -206,7 +211,7 @@ fun ScanResultScannedContent(
             ) {
                 Spacer(modifier = Modifier.height(dimens.qr / 2))
 
-                state.qrType?.let {
+                state.qrCode?.let {
                     var isFocused by remember { mutableStateOf(false) }
 
                     val focusManager = LocalFocusManager.current
@@ -424,7 +429,7 @@ private fun LoginScreenPreviewText() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum justo metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium. Adipiscing ipsum lacinia tincidunt sed. In risus dui accumsan accumsan quam morbi nulla. Dictum metus auctor nunc quam id sed. Urna nisi gravida sed lobortis diam pretium.",
                     type = QrCodeType.Text
                 )
@@ -441,7 +446,7 @@ private fun LoginScreenPreviewLink() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "http://https://pl-coding.mymemberspot.io",
                     type = Link
                 )
@@ -458,7 +463,7 @@ private fun LoginScreenPreviewContact() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "BEGIN:VCARD\nVERSION:3.0\nN:Olivia Schmidt\nTEL:+1 (555) 284-7390\nEMAIL:olivia.schmidt@example.com\nEND:VCARD",
                     type = Contact(
                         name = "Olivia Schmidt",
@@ -479,7 +484,7 @@ private fun LoginScreenPreviewPhoneNumber() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "",
                     type = PhoneNumber("+49 170 1234567")
                 )
@@ -496,7 +501,7 @@ private fun LoginScreenPreviewGeolocation() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "50.4501,30.5234",
                     type = Geolocation(
                         latitude = "50.4501",
@@ -516,7 +521,7 @@ private fun LoginScreenPreviewWifi() {
         ScanResultPreviewScreen(
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
-                qrType = QrCode(
+                qrCode = QrCode(
                     rawContent = "WIFI:S:DevHub_WiFi;T:WPA;P:QrCraft2025;H:false;;",
                     type = Wifi(
                         ssid = "DevHub_WiFi",
