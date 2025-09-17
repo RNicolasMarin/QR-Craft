@@ -14,7 +14,8 @@ data class QrCode(
     var title: String = "",
     var type: QrCodeType,
     var createdAt: Long = -1,
-    var scannedOrGenerated: ScannedOrGenerated = SCANNED
+    var scannedOrGenerated: ScannedOrGenerated = SCANNED,
+    var isFavourite: Boolean = false
 )
 
 sealed class QrCodeType(val typeId: Int) {

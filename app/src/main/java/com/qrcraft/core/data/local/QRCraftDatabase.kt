@@ -4,18 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.qrcraft.core.data.local.daos.QrCodeDao
 import com.qrcraft.core.data.local.entities.QrCodeEntity
 
 @Database(
     entities = [QrCodeEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class QRCraftDatabase: RoomDatabase() {
 
     abstract fun qrCodeDao(): QrCodeDao
     companion object {
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE qr_codes ADD COLUMN isFavourite INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         @Volatile
         private var INSTANCE: QRCraftDatabase? = null
 
@@ -30,6 +39,8 @@ abstract class QRCraftDatabase: RoomDatabase() {
                 context.applicationContext,
                 QRCraftDatabase::class.java,
                 "QRCraft.db"
-            ).build()
+            )
+                .addMigrations(MIGRATION_1_2)
+                .build()
     }
 }

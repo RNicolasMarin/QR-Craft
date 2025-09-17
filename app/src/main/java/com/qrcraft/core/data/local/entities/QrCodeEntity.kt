@@ -15,7 +15,8 @@ data class QrCodeEntity(
     var title: String,
     var type: Int,
     var createdAt: Long,
-    var scannedOrGenerated: Int
+    var scannedOrGenerated: Int,
+    var isFavourite: Boolean = false
 )
 
 fun QrCode.toEntity() = QrCodeEntity(
@@ -24,7 +25,8 @@ fun QrCode.toEntity() = QrCodeEntity(
     title = title,
     type = type.typeId,
     createdAt = createdAt,
-    scannedOrGenerated = scannedOrGenerated.typeValue
+    scannedOrGenerated = scannedOrGenerated.typeValue,
+    isFavourite = isFavourite
 )
 
 fun QrCodeEntity.toDomain() = QrCode(
@@ -33,5 +35,6 @@ fun QrCodeEntity.toDomain() = QrCode(
     title = title,
     type = QrCodeTypeConverter().convertToType(type, rawContent),
     createdAt = createdAt,
-    scannedOrGenerated = ScannedOrGenerated.entries.first { it.typeValue == scannedOrGenerated }
+    scannedOrGenerated = ScannedOrGenerated.entries.first { it.typeValue == scannedOrGenerated },
+    isFavourite = isFavourite
 )
