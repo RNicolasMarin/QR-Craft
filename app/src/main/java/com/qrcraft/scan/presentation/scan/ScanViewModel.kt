@@ -109,9 +109,9 @@ class ScanViewModel(
                     )
                     val id = repository.insert(qrCode)
 
-                    state = state.copy(
+                    /*state = state.copy(
                         infoToShow = NONE
-                    )
+                    )*/
                     eventChannel.send(
                         GoToScanResult(
                             qrCodeId = id

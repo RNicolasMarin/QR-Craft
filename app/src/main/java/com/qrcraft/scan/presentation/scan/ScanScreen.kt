@@ -261,20 +261,22 @@ fun ScanScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    TopIconButton(
-                        background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
-                        iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
-                        onClick = {
-                            onAction(TryToggleFlashlight(true))
-                        }
-                    )
-                    TopIconButton(
-                        background = SurfaceHigher,
-                        iconRes = R.drawable.ic_image_picker,
-                        onClick = {
-                            onAction(PickImage)
-                        }
-                    )
+                    if (state.infoToShow == NONE) {
+                        TopIconButton(
+                            background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
+                            iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
+                            onClick = {
+                                onAction(TryToggleFlashlight(true))
+                            }
+                        )
+                        TopIconButton(
+                            background = SurfaceHigher,
+                            iconRes = R.drawable.ic_image_picker,
+                            onClick = {
+                                onAction(PickImage)
+                            }
+                        )
+                    }
                 }
                 Text(
                     text = stringResource(R.string.point_your_camera),
