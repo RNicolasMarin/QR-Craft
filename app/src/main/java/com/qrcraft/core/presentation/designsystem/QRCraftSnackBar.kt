@@ -15,18 +15,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun QRCraftSnackBar(
     message: String,
     modifier: Modifier = Modifier,
+    background: Color = Success,
+    imageVector: ImageVector = Icons.Default.Check,
 ) {
     Surface(
         modifier = modifier
             .padding(horizontal = 12.dp, vertical = 4.dp),
         shape = RoundedCornerShape(6.dp),
-        color = Success,
+        color = background,
         tonalElevation = 6.dp,
         shadowElevation = 4.dp,
     ) {
@@ -37,7 +41,7 @@ fun QRCraftSnackBar(
                 .padding(horizontal = 12.dp, vertical = 4.dp),
         ) {
             Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = imageVector,
                 contentDescription = "Success",
                 tint = MaterialTheme.colorScheme.onSurface
             )

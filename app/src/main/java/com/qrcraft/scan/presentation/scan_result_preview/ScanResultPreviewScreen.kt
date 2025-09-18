@@ -1,8 +1,8 @@
 package com.qrcraft.scan.presentation.scan_result_preview
 
 import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
-import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -32,9 +32,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +57,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -70,7 +77,10 @@ import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
+import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
+import com.qrcraft.core.presentation.designsystem.Red
+import com.qrcraft.core.presentation.designsystem.Success
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.rememberKeyboardVisibility
@@ -79,15 +89,19 @@ import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.presentation.scan_result_preview.QrTypeTextState.*
 import com.qrcraft.scan.presentation.scan_result_preview.ScanResultPreviewAction.*
+import com.qrcraft.scan.presentation.scan_result_preview.SnackBarType.*
 import com.qrcraft.scan.presentation.util.copyContent
 import com.qrcraft.scan.presentation.util.generateQrCode
 import com.qrcraft.scan.presentation.util.getFormattedContentResultPreview
 import com.qrcraft.scan.presentation.util.getStringRes
 import com.qrcraft.scan.presentation.util.opeLink
 import com.qrcraft.scan.presentation.util.shareContent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-import java.io.File
-import java.io.FileOutputStream
+
+val success = "Success"
+val error = "Error"
 
 @Composable
 fun ScanResultPreviewScreenRoot(
@@ -114,7 +128,11 @@ fun ScanResultPreviewScreenRoot(
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     ScanResultPreviewScreen(
+        snackBarHostState = snackBarHostState,
         titleRes = titleRes,
         state = viewModel.state,
         onAction = { action ->
@@ -130,26 +148,11 @@ fun ScanResultPreviewScreenRoot(
                     context.opeLink(action.link)
                 }
                 is SaveQrImage -> {
-                    val fileName = "QrCraft_Image_${System.currentTimeMillis()}.png"
-                    val resolver = context.contentResolver
-                    val mimeType = "image/png"
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // ✅ Modern approach with MediaStore + RELATIVE_PATH
-                        val contentValues = ContentValues().apply {
-                            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-                            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                        }
-
-                        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-
-                        uri?.let {
-                            resolver.openOutputStream(it)?.use { outStream ->
-                                action.bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
-                            }
-                        }
-
+                    scope.launch {
+                        val isSuccess = context.tryToDownloadQrCodeAsImage(action.bitmap)
+                        snackBarHostState.showSnackbar(
+                            message = if (isSuccess) success else error,
+                        )
                     }
                 }
                 else -> Unit
@@ -159,9 +162,43 @@ fun ScanResultPreviewScreenRoot(
     )
 }
 
+private suspend fun Context.tryToDownloadQrCodeAsImage(bitmap: Bitmap): Boolean {
+    with(Dispatchers.IO) {
+        val fileName = "QrCraft_Image_${System.currentTimeMillis()}.png"
+        val resolver = contentResolver
+        val mimeType = "image/png"
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+                if (uri == null) {
+                    return false
+                }
+
+                return resolver.openOutputStream(uri)?.use { outStream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
+                } ?: run {
+                    false
+                }
+            }
+            return false
+        } catch (e: Exception) {
+            return false
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanResultPreviewScreen(
+    snackBarHostState: SnackbarHostState,
     titleRes: Int,
     state: ScanResultPreviewState,
     onAction: (ScanResultPreviewAction) -> Unit,
@@ -173,34 +210,48 @@ fun ScanResultPreviewScreen(
 
     val scrollState = rememberScrollState()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.onSurface)
             .padding(WindowInsets.navigationBars.asPaddingValues())
             .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp)
-            .verticalScroll(scrollState),
     ) {
-        QRCraftTopBar(
-            color = OnOverlay,
-            titleRes = titleRes,
-            modifier = Modifier.fillMaxWidth(),
-            rightIconRes = if (state.qrCode?.isFavourite == true) R.drawable.ic_favourite_checked else R.drawable.ic_favourite_unchecked,
-            onClickRightIcon = {
-                onAction(CheckUncheckFavourite)
-            },
-            onBackClicked = {
-                onAction(GoBack)
-            }
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
+        ) {
+            QRCraftTopBar(
+                color = OnOverlay,
+                titleRes = titleRes,
+                modifier = Modifier.fillMaxWidth(),
+                rightIconRes = if (state.qrCode?.isFavourite == true) R.drawable.ic_favourite_checked else R.drawable.ic_favourite_unchecked,
+                onClickRightIcon = {
+                    onAction(CheckUncheckFavourite)
+                },
+                onBackClicked = {
+                    onAction(GoBack)
+                }
+            )
 
-        Spacer(modifier = Modifier.height(44.dp))
+            Spacer(modifier = Modifier.height(44.dp))
 
-        ScanResultScannedContent(
-            state = state,
-            onAction = onAction,
-            modifier = Modifier.fillMaxWidth()
-        )
+            ScanResultScannedContent(
+                state = state,
+                onAction = onAction,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            MyCustomSnackBarHost(
+                hostState = snackBarHostState,
+                modifier = Modifier
+            )
+        }
     }
 }
 
@@ -319,7 +370,7 @@ fun ScanResultScannedContent(
                         text = formattedContent,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = if (it is Text) TextAlign.Start else TextAlign.Center,
+                        textAlign = if (it.type is Text) TextAlign.Start else TextAlign.Center,
                         maxLines = textState.maxLines,
                         overflow = textState.overflow,
                         onTextLayout = { textLayoutResult ->
@@ -420,6 +471,40 @@ fun ScanResultScannedContent(
 }
 
 @Composable
+fun MyCustomSnackBarHost(
+    hostState: SnackbarHostState,
+    modifier: Modifier = Modifier
+) {
+    SnackbarHost(
+        hostState = hostState,
+        modifier = modifier
+    ) { data ->
+        val type = if (data.visuals.message == success) SUCCESS else ERROR
+        QRCraftSnackBar(
+            message = stringResource(type.titleRes),
+            imageVector = type.imageVector,
+            background = type.background
+        )
+    }
+}
+
+enum class SnackBarType(val titleRes: Int, val background: Color, val imageVector: ImageVector) {
+    SUCCESS(R.string.scan_result_saved, Success, Icons.Default.Check),
+    ERROR(R.string.scan_result_not_saved, Red, Icons.Default.Close)
+}
+
+sealed class SnackType {
+    object Success : SnackType()
+    object Error : SnackType()
+}
+
+data class SnackData(
+    val type: SnackType,
+    val messageRes: Int
+)
+
+
+@Composable
 fun ScanResultScannedContentActionButton(
     modifier: Modifier = Modifier,
     @StringRes textRes: Int?,
@@ -469,6 +554,7 @@ enum class QrTypeTextState(val maxLines: Int, val overflow: TextOverflow, val bu
 private fun LoginScreenPreviewText() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
@@ -486,6 +572,7 @@ private fun LoginScreenPreviewText() {
 private fun LoginScreenPreviewLink() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
@@ -503,6 +590,7 @@ private fun LoginScreenPreviewLink() {
 private fun LoginScreenPreviewContact() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
@@ -524,6 +612,7 @@ private fun LoginScreenPreviewContact() {
 private fun LoginScreenPreviewPhoneNumber() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
@@ -541,6 +630,7 @@ private fun LoginScreenPreviewPhoneNumber() {
 private fun LoginScreenPreviewGeolocation() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
@@ -561,6 +651,7 @@ private fun LoginScreenPreviewGeolocation() {
 private fun LoginScreenPreviewWifi() {
     QRCraftTheme {
         ScanResultPreviewScreen(
+            snackBarHostState = SnackbarHostState(),
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
