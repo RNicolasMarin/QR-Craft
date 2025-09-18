@@ -1,5 +1,7 @@
 package com.qrcraft.scan.presentation.scan_result_preview
 
+import android.graphics.Bitmap
+
 sealed interface ScanResultPreviewAction {
 
     data class SetNonSavedQrContent(
@@ -27,5 +29,9 @@ sealed interface ScanResultPreviewAction {
     data object OnScreenRemoved : ScanResultPreviewAction
 
     data object CheckUncheckFavourite: ScanResultPreviewAction
+
+    data class SaveQrImage(
+        val bitmap: Bitmap
+    ): ScanResultPreviewAction
 
 }
