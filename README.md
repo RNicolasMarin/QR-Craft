@@ -1,23 +1,28 @@
 
 # QR Craft
 
-An Android application built with Jetpack Compose for scanning QR codes. Created as Milestone 1, 2 and 3 of the August–September App Challenge on Philipp Lackner’s Mobile Dev Campus.
+An Android application built with Jetpack Compose for scanning QR codes. Created as Milestone 1, 2, 3 and 4 of the August–September App Challenge on Philipp Lackner’s Mobile Dev Campus.
 
 <img width="885" height="183" alt="Github Readme Logo QR Craft" src="https://github.com/user-attachments/assets/0b3e12a8-5f41-4bc5-a0a9-a7457f607010" />
 
 ## Features
 
-In Milestone 3, the application consists of the following features:
+In Milestone 4, the application consists of the following features:
 - Splash Screen: Displays the app icon.
   
 <img width="350" height="2270" alt="Screenshot_20250816_165820" src="https://github.com/user-attachments/assets/5e48a93d-9461-4a96-9838-f2c859e584a2" />
   
-- Scan Screen: Requests camera permission using a custom dialog. If granted, it shows the camera preview with a frame for QR code detection. Once a QR code is recognized, is saved internally and it navigates to the next screen.
-<img width="350" height="2270" alt="Screenshot_20250828_200155" src="https://github.com/user-attachments/assets/fedadc4b-925c-428c-b447-78008d74727b" />
+- Scan Screen: Requests camera permission using a custom dialog. If granted, it shows the camera preview with a frame for QR code detection. Once a QR code is recognized, is saved internally and it navigates to the next screen. Alternatively you have a button tu turn on and off the device's flashlight and a button to pick an image from your gallery to scan for a QR Code.
+ 
+<img width="350" height="2270" alt="Screenshot_20250919_115213" src="https://github.com/user-attachments/assets/d64d09db-2138-444e-90a2-9ed6f33e65f4" />
 
-- Scan Result Screen: Displays the scanned QR code and its data in the appropriate format. The app supports links, contacts, phone numbers, geolocations, Wi-Fi credentials, and plain text. Depending on the type, additional features are available—for example, tapping a link opens it in the browser, or long text (more than 6 lines) can be expanded/collapsed with a “Show more/less” button. This screen also includes Share and Copy actions and allows to edit a title or use the QR Code type as a default title (which would be saved when navigating to the previous screen).
-
-<img width="350" height="2270" alt="Screenshot_20250816_170209" src="https://github.com/user-attachments/assets/f57c24cd-5e4f-469a-98fb-1644848c16bb" />
+- Scan Result Screen: Displays the scanned QR code and its data in the appropriate format. The app supports links, contacts, phone numbers, geolocations, Wi-Fi credentials, and plain text. Depending on the type, additional features are available, for example, tapping a link opens it in the browser, or long text (more than 6 lines) can be expanded/collapsed with a “Show more/less” button. This screen also includes:
+-- a Favourite button to saved this QR Code as Favourite or not
+-- a Share and Copy actions
+-- a Save button to download the QR Code as a PNG file.
+-- and allows to edit a title or use the QR Code type as a default title (which would be saved when navigating to the previous screen).
+  
+<img width="350" height="2270" alt="Screenshot_20250919_115838" src="https://github.com/user-attachments/assets/d51bcd0d-c8b2-4c2c-8095-695124b684fc" />
 
 - Create QR Screen: From the Scan Screen, you can tap the right button located at the center-bottom component to navigate here. In this screen, you can choose the type of QR Code you want to create.
 
@@ -31,16 +36,15 @@ In Milestone 3, the application consists of the following features:
 
 <img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/59a16517-d13b-432b-998f-aeca086ebed9" />
 
-- Scan History Screen: it shows a tab with all the QR Codes locally saved that were scanned and that were generated. For each QR Code shows an icon according to its type, its title (custom or default), a preview of its content and the time of creation.
+- Scan History Screen: it shows a tab with all the QR Codes locally saved that were scanned and that were generated order with first the favourites and then the non favourties, from newest to oldest. For each QR Code shows an icon according to its type, its title (custom or default), a preview of its content, the time of creation and the favourite icon to check or uncheck as favourite.
 
-<img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/77a4cc21-7ecd-4932-9b23-4632167e438e" />
+<img width="350" height="2270" alt="Screenshot_20250919_122202" src="https://github.com/user-attachments/assets/3d120cda-7afd-447f-8a37-1c2e8368e811" />
 
-This screen also allows the next action:
+This screen also allows the next actions:
 - Tap: Open the Preview Screen
 - Long Press: Opesn a bottom sheet with the options to Share (opens the system share sheet) and Delete (removes the item from history).
 
-<img width="350" height="2270" alt="Screenshot_20250828_201347" src="https://github.com/user-attachments/assets/267b5207-3dae-4df3-8faa-2f91cbc242e1" />
-
+<img width="350" height="2270" alt="Screenshot_20250919_122551" src="https://github.com/user-attachments/assets/df79d567-3156-4790-aafd-ab5f2a5def29" />
 
 ## Built with
 
@@ -63,7 +67,7 @@ This screen also allows the next action:
 * **Room**: library for local SQLite database.
 
 ## Roadmap
-I will begin working on Milestone 4 in the middle of September. Except for some minor improvements that would be the last version for this app.
+I will begin work on a final version with some small corrections and improvements.
 
 ## Feedback
 
