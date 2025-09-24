@@ -78,6 +78,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
+import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.designsystem.DimensScan
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
@@ -326,9 +328,15 @@ fun ScanScreen(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    QRCraftBottomNavigationBar(//
-                        onCreate = { onAction(OnCreateQr) },
-                        onHistory = { onAction(OnScanHistory) }
+                    QRCraftBottomNavigationBar(
+                        selectedOption = NONE_SELECTED,
+                        onAction = {
+                            when (it) {
+                                BottomNavigationBarOnCreate -> onAction(OnCreateQr)
+                                BottomNavigationBarOnHistory -> onAction(OnScanHistory)
+                                else -> Unit
+                            }
+                        },
                     )
                 }
             }

@@ -235,6 +235,7 @@ fun ScanResultPreviewScreen(
                     when (it) {
                         TopBarOnBackClicked -> onAction(GoBack)
                         TopBarOnRightClicked -> onAction(CheckUncheckFavourite)
+                        else -> Unit
                     }
                 }
             )

@@ -57,6 +57,7 @@ fun BaseComponentPortrait(
     topBarConfig: QRCraftTopBarConfig? = null,
     showBlur: Boolean = false,
     snackBarMessage: String? = null,
+    selectedOption: BottomNavigationBarOption? = null,
     onAction: (BaseComponentAction) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
@@ -135,15 +136,14 @@ fun BaseComponentPortrait(
             Spacer(modifier = Modifier.height(14.dp))
 
             //bottom nav component
-            QRCraftBottomNavigationBar(
-                modifier = Modifier,
-                isOnHistory = false,
-                isOnCreating = false,
-                onCreate = {},
-                onHistory = {},
-            )
+            selectedOption?.let {
+                QRCraftBottomNavigationBar(
+                    selectedOption = it,
+                    onAction = onAction
+                )
 
-            Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+            }
         }
         Box(
             contentAlignment = Alignment.Center,

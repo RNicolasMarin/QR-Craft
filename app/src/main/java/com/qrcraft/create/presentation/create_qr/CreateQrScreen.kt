@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
@@ -96,10 +97,8 @@ fun CreateQrScreen(
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            QRCraftBottomNavigationBar(//
-                isOnCreating = true,
-                onCreate = { },
-                onHistory = { }
+            QRCraftBottomNavigationBar(
+                selectedOption = CREATE
             )
         }
     }

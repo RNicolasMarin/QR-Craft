@@ -19,6 +19,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
+import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.designsystem.DimensBottomBar
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
@@ -28,11 +30,9 @@ import com.qrcraft.core.presentation.designsystem.dimen
 @Composable
 fun QRCraftBottomNavigationBar(
     modifier: Modifier = Modifier,
-    isOnHistory: Boolean = false,
-    isOnCreating: Boolean = false,
-    onCreate: () -> Unit,
-    onHistory: () -> Unit,
-    dimens: DimensBottomBar = MaterialTheme.dimen.bottomBar
+    dimens: DimensBottomBar = MaterialTheme.dimen.bottomBar,
+    selectedOption: BottomNavigationBarOption,
+    onAction: (BaseComponentAction) -> Unit = {}
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -48,8 +48,10 @@ fun QRCraftBottomNavigationBar(
             QRCraftBottomNavigationBarSecondaryButton(
                 iconRes = R.drawable.ic_history,
                 contentDescription = "History",
-                isHighlighting = isOnHistory,
-                onClick = onHistory
+                isHighlighting = selectedOption == HISTORY,
+                onClick = {
+                    onAction(BottomNavigationBarOnHistory)
+                }
             )
 
             Spacer(modifier = Modifier.width(dimens.spaceBetween))
@@ -57,8 +59,10 @@ fun QRCraftBottomNavigationBar(
             QRCraftBottomNavigationBarSecondaryButton(
                 iconRes = R.drawable.ic_create,
                 contentDescription = "Create",
-                isHighlighting = isOnCreating,
-                onClick = onCreate
+                isHighlighting = selectedOption == CREATE,
+                onClick = {
+                    onAction(BottomNavigationBarOnCreate)
+                }
             )
         }
         IconButton(
@@ -102,15 +106,18 @@ fun QRCraftBottomNavigationBarSecondaryButton(
     }
 }
 
+enum class BottomNavigationBarOption {
+    HISTORY,
+    CREATE,
+    NONE_SELECTED
+}
+
 @Preview
 @Composable
 private fun QRCraftBottomNavigationBarPreview() {
     QRCraftTheme {
         QRCraftBottomNavigationBar(
-            isOnHistory = true,
-            isOnCreating = true,
-            onCreate = {},
-            onHistory = {}
+            selectedOption = CREATE
         )
     }
 }

@@ -5,4 +5,9 @@ sealed class BaseComponentAction {
     data object TopBarOnBackClicked: BaseComponentAction()
 
     data object TopBarOnRightClicked: BaseComponentAction()
+
+    data object BottomNavigationBarOnCreate: BaseComponentAction()
+
+    data object BottomNavigationBarOnHistory: BaseComponentAction()
+
 }
