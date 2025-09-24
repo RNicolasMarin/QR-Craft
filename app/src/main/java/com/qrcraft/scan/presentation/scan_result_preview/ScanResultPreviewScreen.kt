@@ -69,7 +69,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.designsystem.DimensScanResultScannedContent
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.Grey2
@@ -223,15 +225,17 @@ fun ScanResultPreviewScreen(
                 .verticalScroll(scrollState),
         ) {
             QRCraftTopBar(
-                color = OnOverlay,
-                titleRes = titleRes,
+                config = QRCraftTopBarConfig(
+                    titleRes = titleRes,
+                    color = OnOverlay,
+                    rightIconRes = if (state.qrCode?.isFavourite == true) R.drawable.ic_favourite_checked else R.drawable.ic_favourite_unchecked,
+                ),
                 modifier = Modifier.fillMaxWidth(),
-                rightIconRes = if (state.qrCode?.isFavourite == true) R.drawable.ic_favourite_checked else R.drawable.ic_favourite_unchecked,
-                onClickRightIcon = {
-                    onAction(CheckUncheckFavourite)
-                },
-                onBackClicked = {
-                    onAction(GoBack)
+                onAction = {
+                    when (it) {
+                        TopBarOnBackClicked -> onAction(GoBack)
+                        TopBarOnRightClicked -> onAction(CheckUncheckFavourite)
+                    }
                 }
             )
 

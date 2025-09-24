@@ -1,6 +1,7 @@
 package com.qrcraft.core.presentation.designsystem
 
 enum class ScreenConfiguration {
-    MOBILE_DEVICES,
-    WIDER_SCREEN
+    PHONE_PORTRAIT,
+    TABLET_PORTRAIT,
+    LANDSCAPE
 }

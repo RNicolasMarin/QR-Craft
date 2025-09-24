@@ -30,21 +30,26 @@ fun QRCraftTheme(
     Log.d("ScreenSize", "widthDp = $widthDp, heightDp = $heightDp")
 
     val screenConfiguration = when {
-        widthDp < 600 -> MOBILE_DEVICES
-        else -> WIDER_SCREEN
+        //widthDp > heightDp && heightDp > 600 -> TABLET_LANDSCAPE
+        widthDp > heightDp -> LANDSCAPE
+        //widthDp < 840 && heightDp < 900 -> PHONE_PORTRAIT
+        widthDp < 600 -> PHONE_PORTRAIT
+        else -> TABLET_PORTRAIT
     }
 
     val dimens = when (screenConfiguration) {
-        MOBILE_DEVICES -> dimensMobile
-        WIDER_SCREEN -> dimensWider
+        PHONE_PORTRAIT -> dimensPhonePortrait
+        TABLET_PORTRAIT -> dimensTabletPortrait
+        LANDSCAPE -> dimensPhonePortrait//check again
     }
 
     ProvideDimens(dimens) {
-        MaterialTheme(
-            colorScheme = ColorScheme,
-            typography = Typography,
-            content = content
-        )
+        ProvideScreenConfiguration(screenConfiguration) {
+            MaterialTheme(
+                colorScheme = ColorScheme,
+                typography = Typography,
+                content = content
+            )
+        }
     }
-
 }

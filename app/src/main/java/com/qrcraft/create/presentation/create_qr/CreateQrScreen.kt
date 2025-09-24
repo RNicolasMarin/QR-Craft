@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.DimensCreateQr
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
@@ -77,9 +78,12 @@ fun CreateQrScreen(
                 .verticalScroll(scrollState),
         ) {
             QRCraftTopBar(
-                color = MaterialTheme.colorScheme.onSurface,
+                config = QRCraftTopBarConfig(
+                    titleRes = R.string.create_qr_title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    backIconRes = null
+                ),
                 modifier = Modifier.fillMaxWidth(),
-                titleRes = R.string.create_qr_title,
             )
             CreateQrScreenGrid(
                 onAction = onAction
@@ -92,7 +96,7 @@ fun CreateQrScreen(
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            QRCraftBottomNavigationBar(
+            QRCraftBottomNavigationBar(//
                 isOnCreating = true,
                 onCreate = { },
                 onHistory = { }

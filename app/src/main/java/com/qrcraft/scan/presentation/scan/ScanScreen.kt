@@ -314,7 +314,7 @@ fun ScanScreen(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    MyCustomSnackBarHost(
+                    MyCustomSnackBarHost(//
                         hostState = snackBarHostState,
                         modifier = Modifier
                     )
@@ -326,7 +326,7 @@ fun ScanScreen(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    QRCraftBottomNavigationBar(
+                    QRCraftBottomNavigationBar(//
                         onCreate = { onAction(OnCreateQr) },
                         onHistory = { onAction(OnScanHistory) }
                     )

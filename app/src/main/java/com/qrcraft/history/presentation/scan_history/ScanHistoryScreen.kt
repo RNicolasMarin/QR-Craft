@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
@@ -114,11 +115,14 @@ fun ScanHistoryScreen(
                 .padding(bottom = 16.dp),
         ) {
             QRCraftTopBar(
-                color = MaterialTheme.colorScheme.onSurface,
+                config = QRCraftTopBarConfig(
+                    titleRes = R.string.scan_history_title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    backIconRes = null
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = dimens.paddingStart, end = dimens.paddingEnd),
-                titleRes = R.string.scan_history_title,
             )
 
             ScanHistoryTabsAndContent(

@@ -19,7 +19,7 @@ fun ProvideDimens(
 }
 
 private val LocalDimen = staticCompositionLocalOf {
-    dimensMobile
+    dimensPhonePortrait
 }
 
 val MaterialTheme.dimen: Dimens

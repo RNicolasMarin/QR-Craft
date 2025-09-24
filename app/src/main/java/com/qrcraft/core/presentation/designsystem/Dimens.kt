@@ -49,7 +49,7 @@ data class DimensScanResultScannedContent(
     val paddingBottom: Dp,
 )
 
-val dimensMobile = Dimens(
+val dimensPhonePortrait = Dimens(
     topBar = DimensTopBar(
         paddingStart = 16.dp,
         paddingEnd = 16.dp,
@@ -81,7 +81,7 @@ val dimensMobile = Dimens(
     )
 )
 
-val dimensWider = Dimens(
+val dimensTabletPortrait = Dimens(
     topBar = DimensTopBar(
         paddingStart = 24.dp,
         paddingEnd = 24.dp,

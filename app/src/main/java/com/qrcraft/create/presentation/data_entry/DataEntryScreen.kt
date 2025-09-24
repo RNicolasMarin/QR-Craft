@@ -33,7 +33,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.QRCraftTopBar
+import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
@@ -106,10 +108,17 @@ fun DataEntryScreen(
             .verticalScroll(scrollState),
     ) {
         QRCraftTopBar(
-            color = MaterialTheme.colorScheme.onSurface,
-            titleRes = qrTypeUI.textRes,
+            config = QRCraftTopBarConfig(
+                titleRes = qrTypeUI.textRes,
+                color = MaterialTheme.colorScheme.onSurface,
+            ),
             modifier = Modifier.fillMaxWidth(),
-            onBackClicked = { onAction(GoBackToCreateQr) }
+            onAction = {
+                when (it) {
+                    TopBarOnBackClicked -> onAction(GoBackToCreateQr)
+                    else -> Unit
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(dimens.dataEntry.spaceTopBarAndContent))
