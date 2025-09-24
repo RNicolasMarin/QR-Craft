@@ -10,4 +10,10 @@ sealed class BaseComponentAction {
 
     data object BottomNavigationBarOnHistory: BaseComponentAction()
 
+    data object DialogOnClosed: BaseComponentAction()
+
+    data object DialogOnConfirm: BaseComponentAction()
+
+    data object DialogOnErrorClosed: BaseComponentAction()
+
 }

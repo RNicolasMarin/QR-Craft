@@ -8,19 +8,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
+import com.qrcraft.core.presentation.components.InfoToShow.*
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
+import com.qrcraft.core.presentation.designsystem.OnOverlay
+import com.qrcraft.core.presentation.designsystem.QRCraftDialog
 import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.ScreenConfiguration
@@ -44,6 +52,7 @@ fun QrCodeBaseComponent(
     }
 }
 
+//orientation
 @Composable
 fun BaseComponentLandscape(
     modifier: Modifier = Modifier,
@@ -58,6 +67,7 @@ fun BaseComponentPortrait(
     showBlur: Boolean = false,
     snackBarMessage: String? = null,
     selectedOption: BottomNavigationBarOption? = null,
+    infoToShow: InfoToShow = None,
     onAction: (BaseComponentAction) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
@@ -149,51 +159,54 @@ fun BaseComponentPortrait(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            //permission dialog
-            /*QRCraftDialog(
-                title = R.string.camera_permission_dialog_title,
-                text = R.string.camera_permission_dialog_message,
-                confirmButton = R.string.camera_permission_dialog_grant,
-                dismissButton = R.string.camera_permission_dialog_close,
-                onDismissRequest = {
-                    onAction(CustomDialogClosed)
-                },
-                onConfirmButtonClick = {
-                    onAction(RequestPermission)
-                },
-                onDismissButtonClick = {
-                    onAction(CustomDialogClosed)
+            when (infoToShow) {
+                None -> Unit
+                is RequestPermission -> {
+                    QRCraftDialog(
+                        title = infoToShow.title,
+                        text = infoToShow.text,
+                        confirmButton = infoToShow.confirmButton,
+                        dismissButton = infoToShow.dismissButton,
+                        onDismissRequest = {
+                            onAction(DialogOnClosed)
+                        },
+                        onConfirmButtonClick = {
+                            onAction(DialogOnConfirm)
+                        },
+                        onDismissButtonClick = {
+                            onAction(DialogOnClosed)
+                        }
+                    )
                 }
-            )
-            //loading
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    strokeWidth = 4.dp,
-                    color = OnOverlay
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = stringResource(R.string.scanning_loading),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = OnOverlay,
-                )
+                Loading -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            strokeWidth = 4.dp,
+                            color = OnOverlay
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.scanning_loading),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = OnOverlay,
+                        )
+                    }
+                }
+                Error -> {
+                    QRCraftDialog(
+                        title = R.string.scanning_no_qr_found,
+                        icon = R.drawable.alert_triangle
+                    ) {
+                        onAction(DialogOnErrorClosed)
+                    }
+                }
             }
-            //error dialog
-            QRCraftDialog(
-                title = R.string.scanning_no_qr_found,
-                icon = R.drawable.alert_triangle
-            ) {
-                onAction(ScannerRestartRunning)
-            }*/
         }
     }
 }
-
-//status bar, bottom bar
-//orientation
 
 @Composable
 fun MyCustomSnackBarHost(
