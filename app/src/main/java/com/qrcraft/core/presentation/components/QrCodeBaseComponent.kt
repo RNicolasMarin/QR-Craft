@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -19,12 +21,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
+import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.ScreenConfiguration
 import com.qrcraft.core.presentation.designsystem.ScreenConfiguration.*
 import com.qrcraft.core.presentation.designsystem.Yellow
 import com.qrcraft.core.presentation.designsystem.screenConfiguration
-import com.qrcraft.scan.presentation.scan.MyCustomSnackBarHost
 
 @Composable
 fun QrCodeBaseComponent(
@@ -52,10 +54,21 @@ fun BaseComponentLandscape(
 @Composable
 fun BaseComponentPortrait(
     modifier: Modifier = Modifier,
+    topBarConfig: QRCraftTopBarConfig? = null,
+    showBlur: Boolean = false,
+    snackBarMessage: String? = null,
+    onAction: (BaseComponentAction) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(snackBarMessage) {
+        snackBarMessage?.let {
+            snackBarHostState.showSnackbar(
+                message = it,
+            )
+        }
+    }
 
     Box(
         modifier = modifier
@@ -64,37 +77,40 @@ fun BaseComponentPortrait(
             modifier = Modifier.fillMaxSize()
         ) {
             //top bar
-            /*QRCraftTopBar(
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth(),
-                titleRes = R.string.create_qr_title,
-            )*/
+            topBarConfig?.let {
+                QRCraftTopBar(
+                    config = it,
+                    modifier = Modifier.fillMaxWidth(),
+                    onAction = onAction
+                )
+            }
 
             content()
         }
 
         //bottom nav blur component
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 24.dp, end = 24.dp)//
-        ) {
-            Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
-                            Color(0xFFEDF2F5)                    // bottom solid
+        if (showBlur) {
+            Box(
+                contentAlignment = Alignment.BottomCenter,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 24.dp, end = 24.dp)//
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
+                                Color(0xFFEDF2F5)                    // bottom solid
+                            )
                         )
                     )
                 )
-            )
+            }
         }
-
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -103,16 +119,18 @@ fun BaseComponentPortrait(
             Spacer(modifier = Modifier.weight(1f))
 
             //snack bar host
-            Box(
+            /*Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
                 MyCustomSnackBarHost(
-                    hostState = snackBarHostState,
-                    modifier = Modifier
+                    hostState = snackBarHostState
                 )
-            }
+            }*/
+            MyCustomSnackBarHost(
+                hostState = snackBarHostState
+            )
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -177,6 +195,20 @@ fun BaseComponentPortrait(
 //status bar, bottom bar
 //orientation
 
+@Composable
+fun MyCustomSnackBarHost(
+    hostState: SnackbarHostState,
+    modifier: Modifier = Modifier
+) {
+    SnackbarHost(
+        hostState = hostState,
+        modifier = modifier
+    ) { data ->
+        QRCraftSnackBar(
+            message = data.visuals.message
+        )
+    }
+}
 
 @MultiDevicePreview
 @Composable
