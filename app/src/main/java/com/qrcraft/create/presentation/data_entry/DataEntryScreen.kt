@@ -5,12 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -34,8 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.BaseComponentAction.*
-import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
+import com.qrcraft.core.presentation.components.QrCraftBaseComponent
 import com.qrcraft.core.presentation.designsystem.Dimens
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
@@ -98,35 +95,34 @@ fun DataEntryScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(WindowInsets.navigationBars.asPaddingValues())
-            .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd, bottom = 16.dp)
-            .verticalScroll(scrollState),
-    ) {
-        QRCraftTopBar(
-            config = QRCraftTopBarConfig(
-                titleRes = qrTypeUI.textRes,
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            onAction = {
-                when (it) {
-                    TopBarOnBackClicked -> onAction(GoBackToCreateQr)
-                    else -> Unit
-                }
+    QrCraftBaseComponent(
+        color = MaterialTheme.colorScheme.surface,
+        topBarConfig = QRCraftTopBarConfig(
+            titleRes = qrTypeUI.textRes,
+            color = MaterialTheme.colorScheme.onSurface,
+        ),
+        onAction = {
+            when (it) {
+                TopBarOnBackClicked -> onAction(GoBackToCreateQr)
+                else -> Unit
             }
-        )
+        }
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd, bottom = 16.dp)
+                .verticalScroll(scrollState),
+        ) {
 
-        Spacer(modifier = Modifier.height(dimens.dataEntry.spaceTopBarAndContent))
+            Spacer(modifier = Modifier.height(dimens.dataEntry.spaceTopBarAndContent))
 
-        DataEntryScreenContent(
-            state = state,
-            onAction = onAction
-        )
+            DataEntryScreenContent(
+                state = state,
+                onAction = onAction
+            )
+        }
     }
 }
 
