@@ -1,19 +1,14 @@
 package com.qrcraft.create.presentation.create_qr
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,9 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
-import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
-import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
+import com.qrcraft.core.presentation.components.QrCraftBaseComponent
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.DimensCreateQr
 import com.qrcraft.core.presentation.designsystem.DimensTopBar
@@ -65,40 +59,25 @@ fun CreateQrScreen(
 
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(WindowInsets.navigationBars.asPaddingValues())
+    QrCraftBaseComponent(
+        color = MaterialTheme.colorScheme.surface,
+        topBarConfig = QRCraftTopBarConfig(
+            titleRes = R.string.create_qr_title,
+            color = MaterialTheme.colorScheme.onSurface,
+            backIconRes = null
+        ),
+        selectedOption = CREATE
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(8f)
                 .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp)
                 .verticalScroll(scrollState),
         ) {
-            QRCraftTopBar(
-                config = QRCraftTopBarConfig(
-                    titleRes = R.string.create_qr_title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    backIconRes = null
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Spacer(Modifier.height(2.dp))
+
             CreateQrScreenGrid(
                 onAction = onAction
-            )
-        }
-
-        Box(
-            contentAlignment = Alignment.TopCenter,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            QRCraftBottomNavigationBar(
-                selectedOption = CREATE
             )
         }
     }
