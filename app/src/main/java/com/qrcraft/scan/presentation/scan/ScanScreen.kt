@@ -198,6 +198,9 @@ fun ScanScreenRoot(
                 PickImage -> {
                     launcher.launch("image/*")
                 }
+                ClearMessageSnackBar -> {
+                    snackBarMessage = null
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -234,6 +237,7 @@ fun ScanScreen(
                 DialogOnClosed -> onAction(CustomDialogClosed)
                 DialogOnConfirm -> onAction(RequestPermission)
                 DialogOnErrorClosed -> onAction(ScannerRestartRunning)
+                SnackBarClearMessage -> onAction(ClearMessageSnackBar)
                 else -> Unit
             }
         }

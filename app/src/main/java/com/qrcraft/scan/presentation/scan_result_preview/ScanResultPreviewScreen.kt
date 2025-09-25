@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,6 +87,7 @@ import com.qrcraft.scan.presentation.util.getStringRes
 import com.qrcraft.scan.presentation.util.opeLink
 import com.qrcraft.scan.presentation.util.shareContent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -113,15 +115,8 @@ fun ScanResultPreviewScreenRoot(
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
+    val scope = rememberCoroutineScope()
     var snackBarMessage by remember { mutableStateOf<String?>(null) }
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-
-    LaunchedEffect(bitmap) {
-        bitmap?.let {
-            val isSuccess = context.tryToDownloadQrCodeAsImage(it)
-            snackBarMessage = if (isSuccess) DOWNLOAD_SUCCESS.text else DOWNLOAD_ERROR.text
-        }
-    }
 
     ScanResultPreviewScreen(
         snackBarMessage = snackBarMessage,
@@ -140,7 +135,13 @@ fun ScanResultPreviewScreenRoot(
                     context.opeLink(action.link)
                 }
                 is SaveQrImage -> {
-                    bitmap = action.bitmap
+                    scope.launch {
+                        val isSuccess = context.tryToDownloadQrCodeAsImage(action.bitmap)
+                        snackBarMessage = if (isSuccess) DOWNLOAD_SUCCESS.text else DOWNLOAD_ERROR.text
+                    }
+                }
+                ClearMessageSnackBar -> {
+                    snackBarMessage = null
                 }
                 else -> Unit
             }
@@ -209,6 +210,7 @@ fun ScanResultPreviewScreen(
             when (it) {
                 TopBarOnBackClicked -> onAction(GoBack)
                 TopBarOnRightClicked -> onAction(CheckUncheckFavourite)
+                SnackBarClearMessage -> onAction(ClearMessageSnackBar)
                 else -> Unit
             }
         }

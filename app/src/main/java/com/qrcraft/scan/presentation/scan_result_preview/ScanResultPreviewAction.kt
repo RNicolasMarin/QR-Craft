@@ -34,4 +34,6 @@ sealed interface ScanResultPreviewAction {
         val bitmap: Bitmap
     ): ScanResultPreviewAction
 
+    data object ClearMessageSnackBar: ScanResultPreviewAction
+
 }

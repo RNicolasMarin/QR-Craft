@@ -142,7 +142,7 @@ class ScanViewModel(
                 )
             }
 
-            OnCreateQr, OnScanHistory, PickImage -> Unit
+            OnCreateQr, OnScanHistory, PickImage, ClearMessageSnackBar -> Unit
         }
     }
 

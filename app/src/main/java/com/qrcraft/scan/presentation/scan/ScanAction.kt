@@ -36,4 +36,6 @@ sealed interface ScanAction {
 
     data object PickImage: ScanAction
 
+    data object ClearMessageSnackBar: ScanAction
+
 }

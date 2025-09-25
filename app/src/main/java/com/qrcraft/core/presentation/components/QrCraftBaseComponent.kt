@@ -38,6 +38,7 @@ import com.qrcraft.core.presentation.designsystem.ScreenConfiguration.*
 import com.qrcraft.core.presentation.designsystem.Yellow
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.screenConfiguration
+import kotlinx.coroutines.delay
 
 @Composable
 fun QrCraftBaseComponent(
@@ -51,19 +52,40 @@ fun QrCraftBaseComponent(
     screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
     content: @Composable () -> Unit,
 ) {
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(snackBarMessage) {
+        snackBarMessage?.let {
+            snackBarHostState.showSnackbar(
+                message = it,
+            )
+            delay(100)
+            onAction(SnackBarClearMessage)
+        }
+    }
+
     val modifier = Modifier
         .fillMaxSize()
         .background(color)
         .padding(WindowInsets.navigationBars.asPaddingValues())
 
     if (screenConfiguration == LANDSCAPE) {
-        BaseComponentLandscape()
+        BaseComponentLandscape(
+            modifier = modifier,
+            topBarConfig = topBarConfig,
+            showBlur = showBlur,
+            snackBarMessage = snackBarMessage,
+            selectedOption = selectedOption,
+            infoToShow = infoToShow,
+            onAction = onAction,
+            content = content
+        )
     } else {
         BaseComponentPortrait(
             modifier = modifier,
             topBarConfig = topBarConfig,
             showBlur = showBlur,
-            snackBarMessage = snackBarMessage,
+            snackBarHostState = snackBarHostState,
             selectedOption = selectedOption,
             infoToShow = infoToShow,
             onAction = onAction,
@@ -76,13 +98,6 @@ fun QrCraftBaseComponent(
 @Composable
 fun BaseComponentLandscape(
     modifier: Modifier = Modifier,
-) {
-    
-}
-
-@Composable
-fun BaseComponentPortrait(
-    modifier: Modifier = Modifier,
     topBarConfig: QRCraftTopBarConfig? = null,
     showBlur: Boolean = false,
     snackBarMessage: String? = null,
@@ -92,16 +107,21 @@ fun BaseComponentPortrait(
     dimens: DimensTopBar = MaterialTheme.dimen.topBar,
     content: @Composable () -> Unit,
 ) {
-    val snackBarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(snackBarMessage) {
-        snackBarMessage?.let {
-            snackBarHostState.showSnackbar(
-                message = it,
-            )
-        }
-    }
+}
 
+@Composable
+fun BaseComponentPortrait(
+    modifier: Modifier = Modifier,
+    topBarConfig: QRCraftTopBarConfig? = null,
+    showBlur: Boolean = false,
+    snackBarHostState: SnackbarHostState,
+    selectedOption: BottomNavigationBarOption? = null,
+    infoToShow: InfoToShow = None,
+    onAction: (BaseComponentAction) -> Unit = {},
+    dimens: DimensTopBar = MaterialTheme.dimen.topBar,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier = modifier
     ) {
