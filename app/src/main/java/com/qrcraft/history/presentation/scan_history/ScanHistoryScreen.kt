@@ -11,12 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,12 +47,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
-import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
-import com.qrcraft.core.presentation.components.QRCraftTopBar
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
+import com.qrcraft.core.presentation.components.QrCraftBaseComponent
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.Dimens
-import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
@@ -101,79 +95,30 @@ fun ScanHistoryScreenRoot(
 @Composable
 fun ScanHistoryScreen(
     state: ScanHistoryState,
-    onAction: (ScanHistoryAction) -> Unit,
-    dimens: DimensTopBar = MaterialTheme.dimen.topBar
+    onAction: (ScanHistoryAction) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(WindowInsets.navigationBars.asPaddingValues())
+    QrCraftBaseComponent(
+        color = MaterialTheme.colorScheme.surface,
+        topBarConfig = QRCraftTopBarConfig(
+            titleRes = R.string.scan_history_title,
+            color = MaterialTheme.colorScheme.onSurface,
+            backIconRes = null
+        ),
+        showBlur = true,
+        selectedOption = HISTORY
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 16.dp),
         ) {
-            QRCraftTopBar(
-                config = QRCraftTopBarConfig(
-                    titleRes = R.string.scan_history_title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    backIconRes = null
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = dimens.paddingStart, end = dimens.paddingEnd),
-            )
 
             ScanHistoryTabsAndContent(
                 state = state,
                 onAction = onAction,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxSize()
             )
-        }
-
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = dimens.paddingStart, end = dimens.paddingEnd)
-        ) {
-            Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
-                            Color(0xFFEDF2F5)                    // bottom solid
-                        )
-                    )
-                )
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = dimens.paddingStart, end = dimens.paddingEnd)
-        ) {
-            Spacer(modifier = Modifier
-                .weight(8f)
-            )
-
-            Box(
-                contentAlignment = Alignment.TopCenter,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                QRCraftBottomNavigationBar(
-                    selectedOption = HISTORY,
-                )
-            }
         }
 
         if (state.selectedQrCode != null) {
