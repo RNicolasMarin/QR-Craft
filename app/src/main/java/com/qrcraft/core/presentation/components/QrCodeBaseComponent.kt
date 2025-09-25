@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,15 +41,32 @@ import com.qrcraft.core.presentation.designsystem.screenConfiguration
 
 @Composable
 fun QrCodeBaseComponent(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    topBarConfig: QRCraftTopBarConfig? = null,
+    showBlur: Boolean = false,
+    snackBarMessage: String? = null,
+    selectedOption: BottomNavigationBarOption? = null,
+    infoToShow: InfoToShow = None,
+    onAction: (BaseComponentAction) -> Unit = {},
+    color: Color,// = MaterialTheme.colorScheme.surface,
     screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
+    content: @Composable () -> Unit,
 ) {
+    val modifier = Modifier
+        .fillMaxSize()
+        .background(color)
+        .padding(WindowInsets.navigationBars.asPaddingValues())
+
     if (screenConfiguration == LANDSCAPE) {
         BaseComponentLandscape()
     } else {
         BaseComponentPortrait(
             modifier = modifier,
+            topBarConfig = topBarConfig,
+            showBlur = showBlur,
+            snackBarMessage = snackBarMessage,
+            selectedOption = selectedOption,
+            infoToShow = infoToShow,
+            onAction = onAction,
             content = content
         )
     }
@@ -228,6 +248,7 @@ fun MyCustomSnackBarHost(
 private fun QrCodeBaseComponentPreview() {
     QRCraftTheme {
         QrCodeBaseComponent(
+            color = MaterialTheme.colorScheme.surface,
             content = {
                 Column(
                     modifier = Modifier.fillMaxSize().background(Yellow)

@@ -80,12 +80,12 @@ import com.google.mlkit.vision.common.InputImage
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
-import com.qrcraft.core.presentation.components.QRCraftBottomNavigationBar
+import com.qrcraft.core.presentation.components.InfoToShow
+import com.qrcraft.core.presentation.components.InfoToShow.*
+import com.qrcraft.core.presentation.components.QrCodeBaseComponent
 import com.qrcraft.core.presentation.designsystem.DimensScan
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnOverlay
-import com.qrcraft.core.presentation.designsystem.QRCraftDialog
-import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
@@ -98,10 +98,10 @@ import com.qrcraft.scan.presentation.util.openAppSettings
 import com.qrcraft.scan.presentation.util.yuvToRgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
+import kotlin.Int
 import kotlin.coroutines.resumeWithException
 import kotlin.math.min
 
@@ -119,8 +119,7 @@ fun ScanScreenRoot(
         viewModel.onAction(UpdateGrantedInitially(context.hasCameraPermission()))
     }
 
-    val snackBarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    var snackBarMessage by remember { mutableStateOf<String?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -191,11 +190,7 @@ fun ScanScreenRoot(
             OpenAppSettings -> context.openAppSettings()
 
             ShowPermissionGrantedSnackBar -> {
-                scope.launch {
-                    snackBarHostState.showSnackbar(
-                        message = grantedMessage,
-                    )
-                }
+                snackBarMessage = grantedMessage
             }
 
             is GoToScanResult -> onScanResultSuccess(event.qrCodeId)
@@ -203,7 +198,7 @@ fun ScanScreenRoot(
     }
 
     ScanScreen(
-        snackBarHostState = snackBarHostState,
+        snackBarMessage = snackBarMessage,
         state = viewModel.state,
         isScanning = viewModel.state::isScanning,
         onAction = { action ->
@@ -222,93 +217,92 @@ fun ScanScreenRoot(
 
 @Composable
 fun ScanScreen(
-    snackBarHostState: SnackbarHostState,
+    snackBarMessage: String?,
     state: ScanState,
     isScanning: () -> Boolean,
     onAction: (ScanAction) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(WindowInsets.navigationBars.asPaddingValues())
+    QrCodeBaseComponent(
+        color = Color.Transparent,
+        snackBarMessage = snackBarMessage,
+        selectedOption = NONE_SELECTED,
+        infoToShow = when (state.infoToShow) {
+            NONE -> None
+            REQUEST_PERMISSION -> InfoToShow.RequestPermission(
+                title = R.string.camera_permission_dialog_title,
+                text = R.string.camera_permission_dialog_message,
+                confirmButton = R.string.camera_permission_dialog_grant,
+                dismissButton = R.string.camera_permission_dialog_close,
+            )
+            LOADING -> Loading
+            NO_QR_FOUND -> Error
+        },
+        onAction = {
+            when (it) {
+                BottomNavigationBarOnCreate -> onAction(OnCreateQr)
+                BottomNavigationBarOnHistory -> onAction(OnScanHistory)
+                DialogOnClosed -> onAction(CustomDialogClosed)
+                DialogOnConfirm -> onAction(RequestPermission)
+                DialogOnErrorClosed -> onAction(ScannerRestartRunning)
+                else -> Unit
+            }
+        }
     ) {
-        //Camera
-        QRCodeScanner(
-            state = state,
-            isScanning = isScanning,
-            modifier = Modifier.fillMaxSize(),
-            onAction = onAction
-        )
+        Box(Modifier.fillMaxSize()) {
+            //Camera
+            QRCodeScanner(
+                state = state,
+                isScanning = isScanning,
+                modifier = Modifier.fillMaxSize(),
+                onAction = onAction
+            )
 
-        //Frame, label, snackbar, bottom navigation bar,
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(
-                        top = statusBarHeight() + 20.dp,
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 30.dp
-                    )
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (state.infoToShow == NONE) {
-                        TopIconButton(
-                            background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
-                            iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
-                            onClick = {
-                                onAction(TryToggleFlashlight(true))
-                            }
-                        )
-                        TopIconButton(
-                            background = SurfaceHigher,
-                            iconRes = R.drawable.ic_image_picker,
-                            onClick = {
-                                onAction(PickImage)
-                            }
-                        )
-                    }
-                }
-                Text(
-                    text = stringResource(R.string.point_your_camera),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = OnOverlay,
-                )
-            }
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                if (state.infoToShow != LOADING) {
-                    ScanFrame(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f)
-                    )
-                }
-            }
+            //Frame, label, snackbar, bottom navigation bar,
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
             ) {
-                Spacer(
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .weight(1f)
-                )
+                        .fillMaxWidth()
+                        .padding(
+                            top = statusBarHeight() + 20.dp,
+                            start = 24.dp,
+                            end = 24.dp,
+                            bottom = 30.dp
+                        )
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (state.infoToShow == NONE) {
+                            TopIconButton(
+                                background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
+                                iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
+                                onClick = {
+                                    onAction(TryToggleFlashlight(true))
+                                }
+                            )
+                            TopIconButton(
+                                background = SurfaceHigher,
+                                iconRes = R.drawable.ic_image_picker,
+                                onClick = {
+                                    onAction(PickImage)
+                                }
+                            )
+                        }
+                    }
+                    Text(
+                        text = stringResource(R.string.point_your_camera),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = OnOverlay,
+                    )
+                }
 
                 Box(
                     contentAlignment = Alignment.Center,
@@ -316,82 +310,16 @@ fun ScanScreen(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    MyCustomSnackBarHost(//
-                        hostState = snackBarHostState,
-                        modifier = Modifier
-                    )
-                }
-
-                Box(
-                    contentAlignment = Alignment.TopCenter,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    QRCraftBottomNavigationBar(
-                        selectedOption = NONE_SELECTED,
-                        onAction = {
-                            when (it) {
-                                BottomNavigationBarOnCreate -> onAction(OnCreateQr)
-                                BottomNavigationBarOnHistory -> onAction(OnScanHistory)
-                                else -> Unit
-                            }
-                        },
-                    )
-                }
-            }
-        }
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            //dialog and loading
-            when (state.infoToShow) {
-                REQUEST_PERMISSION -> {
-                    QRCraftDialog(
-                        title = R.string.camera_permission_dialog_title,
-                        text = R.string.camera_permission_dialog_message,
-                        confirmButton = R.string.camera_permission_dialog_grant,
-                        dismissButton = R.string.camera_permission_dialog_close,
-                        onDismissRequest = {
-                            onAction(CustomDialogClosed)
-                        },
-                        onConfirmButtonClick = {
-                            onAction(RequestPermission)
-                        },
-                        onDismissButtonClick = {
-                            onAction(CustomDialogClosed)
-                        }
-                    )
-                }
-                NONE -> {}
-
-                LOADING -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(32.dp),
-                            strokeWidth = 4.dp,
-                            color = OnOverlay
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(R.string.scanning_loading),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = OnOverlay,
+                    if (state.infoToShow != LOADING) {
+                        ScanFrame(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .aspectRatio(1f)
                         )
                     }
                 }
-                NO_QR_FOUND -> {
-                    QRCraftDialog(
-                        title = R.string.scanning_no_qr_found,
-                        icon = R.drawable.alert_triangle
-                    ) {
-                        onAction(ScannerRestartRunning)
-                    }
-                }
+
+                Box(modifier = Modifier.weight(1f).fillMaxWidth())
             }
         }
     }
@@ -417,21 +345,6 @@ fun TopIconButton(
             contentDescription = "Icon",
             modifier = Modifier
                 .size(16.dp)
-        )
-    }
-}
-
-@Composable
-fun MyCustomSnackBarHost(
-    hostState: SnackbarHostState,
-    modifier: Modifier = Modifier
-) {
-    SnackbarHost(
-        hostState = hostState,
-        modifier = modifier
-    ) { data ->
-        QRCraftSnackBar(
-            message = data.visuals.message
         )
     }
 }
