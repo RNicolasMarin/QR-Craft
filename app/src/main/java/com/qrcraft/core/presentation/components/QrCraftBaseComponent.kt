@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,25 +28,26 @@ import androidx.compose.ui.unit.dp
 import com.qrcraft.R
 import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.InfoToShow.*
+import com.qrcraft.core.presentation.designsystem.DimensTopBar
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnOverlay
 import com.qrcraft.core.presentation.designsystem.QRCraftDialog
-import com.qrcraft.core.presentation.designsystem.QRCraftSnackBar
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.ScreenConfiguration
 import com.qrcraft.core.presentation.designsystem.ScreenConfiguration.*
 import com.qrcraft.core.presentation.designsystem.Yellow
+import com.qrcraft.core.presentation.designsystem.dimen
 import com.qrcraft.core.presentation.designsystem.screenConfiguration
 
 @Composable
-fun QrCodeBaseComponent(
+fun QrCraftBaseComponent(
+    color: Color,
     topBarConfig: QRCraftTopBarConfig? = null,
     showBlur: Boolean = false,
     snackBarMessage: String? = null,
     selectedOption: BottomNavigationBarOption? = null,
     infoToShow: InfoToShow = None,
     onAction: (BaseComponentAction) -> Unit = {},
-    color: Color,// = MaterialTheme.colorScheme.surface,
     screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
     content: @Composable () -> Unit,
 ) {
@@ -89,6 +89,7 @@ fun BaseComponentPortrait(
     selectedOption: BottomNavigationBarOption? = null,
     infoToShow: InfoToShow = None,
     onAction: (BaseComponentAction) -> Unit = {},
+    dimens: DimensTopBar = MaterialTheme.dimen.topBar,
     content: @Composable () -> Unit,
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
@@ -125,7 +126,7 @@ fun BaseComponentPortrait(
                 contentAlignment = Alignment.BottomCenter,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 24.dp, end = 24.dp)//
+                    .padding(start = dimens.paddingStart, end = dimens.paddingEnd)
             ) {
                 Spacer(
                     modifier = Modifier
@@ -150,16 +151,7 @@ fun BaseComponentPortrait(
             Spacer(modifier = Modifier.weight(1f))
 
             //snack bar host
-            /*Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                MyCustomSnackBarHost(
-                    hostState = snackBarHostState
-                )
-            }*/
-            MyCustomSnackBarHost(
+            QrCraftSnackBarHost(
                 hostState = snackBarHostState
             )
 
@@ -228,26 +220,11 @@ fun BaseComponentPortrait(
     }
 }
 
-@Composable
-fun MyCustomSnackBarHost(
-    hostState: SnackbarHostState,
-    modifier: Modifier = Modifier
-) {
-    SnackbarHost(
-        hostState = hostState,
-        modifier = modifier
-    ) { data ->
-        QRCraftSnackBar(
-            message = data.visuals.message
-        )
-    }
-}
-
 @MultiDevicePreview
 @Composable
 private fun QrCodeBaseComponentPreview() {
     QRCraftTheme {
-        QrCodeBaseComponent(
+        QrCraftBaseComponent(
             color = MaterialTheme.colorScheme.surface,
             content = {
                 Column(

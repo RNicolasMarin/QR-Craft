@@ -36,7 +36,7 @@ fun QRCraftTopBar(
     onAction: (BaseComponentAction) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.padding(start = dimens.paddingStart, end = dimens.paddingEnd)
     ) {
         Spacer(
             modifier = Modifier.height(statusBarHeight())
