@@ -3,8 +3,10 @@ package com.qrcraft.core.presentation.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,47 +26,78 @@ import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.designsystem.DimensBottomBar
 import com.qrcraft.core.presentation.designsystem.LinkBg
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
+import com.qrcraft.core.presentation.designsystem.ScreenConfiguration
+import com.qrcraft.core.presentation.designsystem.ScreenConfiguration.*
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.core.presentation.designsystem.screenConfiguration
 
 @Composable
 fun QRCraftBottomNavigationBar(
     modifier: Modifier = Modifier,
     dimens: DimensBottomBar = MaterialTheme.dimen.bottomBar,
     selectedOption: BottomNavigationBarOption,
+    screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
     onAction: (BaseComponentAction) -> Unit = {}
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
+        val backModifier = modifier
+            .background(SurfaceHigher, RoundedCornerShape(100.dp))
+            .padding(dimens.padding)
+        if (screenConfiguration == LANDSCAPE) {
+            Column(
+                modifier = backModifier
+            ) {
 
-        Row(
-            modifier = modifier
-                .background(SurfaceHigher, RoundedCornerShape(100.dp))
-                .padding(dimens.padding)
+                QRCraftBottomNavigationBarSecondaryButton(
+                    iconRes = R.drawable.ic_create,
+                    contentDescription = "Create",
+                    isHighlighting = selectedOption == CREATE,
+                    onClick = {
+                        onAction(BottomNavigationBarOnCreate)
+                    }
+                )
 
-        ) {
-            QRCraftBottomNavigationBarSecondaryButton(
-                iconRes = R.drawable.ic_history,
-                contentDescription = "History",
-                isHighlighting = selectedOption == HISTORY,
-                onClick = {
-                    onAction(BottomNavigationBarOnHistory)
-                }
-            )
+                Spacer(modifier = Modifier.height(dimens.spaceBetween))
 
-            Spacer(modifier = Modifier.width(dimens.spaceBetween))
+                QRCraftBottomNavigationBarSecondaryButton(
+                    iconRes = R.drawable.ic_history,
+                    contentDescription = "History",
+                    isHighlighting = selectedOption == HISTORY,
+                    onClick = {
+                        onAction(BottomNavigationBarOnHistory)
+                    }
+                )
+            }
+        } else {
+            Row(
+                modifier = backModifier
+            ) {
+                QRCraftBottomNavigationBarSecondaryButton(
+                    iconRes = R.drawable.ic_history,
+                    contentDescription = "History",
+                    isHighlighting = selectedOption == HISTORY,
+                    onClick = {
+                        onAction(BottomNavigationBarOnHistory)
+                    }
+                )
 
-            QRCraftBottomNavigationBarSecondaryButton(
-                iconRes = R.drawable.ic_create,
-                contentDescription = "Create",
-                isHighlighting = selectedOption == CREATE,
-                onClick = {
-                    onAction(BottomNavigationBarOnCreate)
-                }
-            )
+                Spacer(modifier = Modifier.width(dimens.spaceBetween))
+
+                QRCraftBottomNavigationBarSecondaryButton(
+                    iconRes = R.drawable.ic_create,
+                    contentDescription = "Create",
+                    isHighlighting = selectedOption == CREATE,
+                    onClick = {
+                        onAction(BottomNavigationBarOnCreate)
+                    }
+                )
+            }
         }
+
         IconButton(
             onClick = {},
             modifier = modifier

@@ -3,6 +3,7 @@ package com.qrcraft.core.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -49,6 +51,7 @@ fun QrCraftBaseComponent(
     selectedOption: BottomNavigationBarOption? = null,
     infoToShow: InfoToShow = None,
     onAction: (BaseComponentAction) -> Unit = {},
+    dimens: DimensTopBar = MaterialTheme.dimen.topBar,
     screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
     content: @Composable () -> Unit,
 ) {
@@ -69,66 +72,13 @@ fun QrCraftBaseComponent(
         .background(color)
         .padding(WindowInsets.navigationBars.asPaddingValues())
 
-    if (screenConfiguration == LANDSCAPE) {
-        BaseComponentLandscape(
-            modifier = modifier,
-            topBarConfig = topBarConfig,
-            showBlur = showBlur,
-            snackBarMessage = snackBarMessage,
-            selectedOption = selectedOption,
-            infoToShow = infoToShow,
-            onAction = onAction,
-            content = content
-        )
-    } else {
-        BaseComponentPortrait(
-            modifier = modifier,
-            topBarConfig = topBarConfig,
-            showBlur = showBlur,
-            snackBarHostState = snackBarHostState,
-            selectedOption = selectedOption,
-            infoToShow = infoToShow,
-            onAction = onAction,
-            content = content
-        )
-    }
-}
-
-//orientation
-@Composable
-fun BaseComponentLandscape(
-    modifier: Modifier = Modifier,
-    topBarConfig: QRCraftTopBarConfig? = null,
-    showBlur: Boolean = false,
-    snackBarMessage: String? = null,
-    selectedOption: BottomNavigationBarOption? = null,
-    infoToShow: InfoToShow = None,
-    onAction: (BaseComponentAction) -> Unit = {},
-    dimens: DimensTopBar = MaterialTheme.dimen.topBar,
-    content: @Composable () -> Unit,
-) {
-
-}
-
-@Composable
-fun BaseComponentPortrait(
-    modifier: Modifier = Modifier,
-    topBarConfig: QRCraftTopBarConfig? = null,
-    showBlur: Boolean = false,
-    snackBarHostState: SnackbarHostState,
-    selectedOption: BottomNavigationBarOption? = null,
-    infoToShow: InfoToShow = None,
-    onAction: (BaseComponentAction) -> Unit = {},
-    dimens: DimensTopBar = MaterialTheme.dimen.topBar,
-    content: @Composable () -> Unit,
-) {
     Box(
         modifier = modifier
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            //top bar
+            //top bar //check orientation sizes
             topBarConfig?.let {
                 QRCraftTopBar(
                     config = it,
@@ -141,7 +91,7 @@ fun BaseComponentPortrait(
         }
 
         //bottom nav blur component
-        if (showBlur) {
+        if (showBlur && (screenConfiguration == PHONE_PORTRAIT || screenConfiguration == TABLET_PORTRAIT)) {
             Box(
                 contentAlignment = Alignment.BottomCenter,
                 modifier = Modifier
@@ -153,14 +103,30 @@ fun BaseComponentPortrait(
                         .fillMaxWidth()
                         .height(200.dp)
                         .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
-                                Color(0xFFEDF2F5)                    // bottom solid
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFFEDF2F5).copy(alpha = 0f),  // top transparent
+                                    Color(0xFFEDF2F5)                    // bottom solid
+                                )
                             )
                         )
-                    )
                 )
+            }
+        }
+
+        if (screenConfiguration == LANDSCAPE && selectedOption != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                QRCraftBottomNavigationBar(
+                    selectedOption = selectedOption,
+                    onAction = onAction
+                )
+
+                Spacer(modifier = Modifier.width(14.dp))
             }
         }
 
@@ -178,15 +144,16 @@ fun BaseComponentPortrait(
             Spacer(modifier = Modifier.height(14.dp))
 
             //bottom nav component
-            selectedOption?.let {
+            if (screenConfiguration != LANDSCAPE && selectedOption != null) {
                 QRCraftBottomNavigationBar(
-                    selectedOption = it,
+                    selectedOption = selectedOption,
                     onAction = onAction
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
             }
         }
+
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()

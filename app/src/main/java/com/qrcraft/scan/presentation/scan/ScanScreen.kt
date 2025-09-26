@@ -25,10 +25,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,8 +80,11 @@ import com.qrcraft.core.presentation.components.SnackBarType.*
 import com.qrcraft.core.presentation.designsystem.DimensScan
 import com.qrcraft.core.presentation.designsystem.ObserveAsEvents
 import com.qrcraft.core.presentation.designsystem.OnOverlay
+import com.qrcraft.core.presentation.designsystem.ScreenConfiguration
+import com.qrcraft.core.presentation.designsystem.ScreenConfiguration.*
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
+import com.qrcraft.core.presentation.designsystem.screenConfiguration
 import com.qrcraft.core.presentation.designsystem.statusBarHeight
 import com.qrcraft.scan.presentation.scan.ScanAction.*
 import com.qrcraft.scan.presentation.scan.ScanAction.ScannerQrNotFound
@@ -213,7 +218,8 @@ fun ScanScreen(
     snackBarMessage: String?,
     state: ScanState,
     isScanning: () -> Boolean,
-    onAction: (ScanAction) -> Unit
+    onAction: (ScanAction) -> Unit,
+    screenConfiguration: ScreenConfiguration = MaterialTheme.screenConfiguration,
 ) {
     QrCraftBaseComponent(
         color = Color.Transparent,
@@ -251,37 +257,28 @@ fun ScanScreen(
                 onAction = onAction
             )
 
-            //Frame, label, snackbar, bottom navigation bar,
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+
+            //Flashlight, Image picker, Frame, label
+            val backModifier =  Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+            if (screenConfiguration == LANDSCAPE) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = backModifier
                         .padding(
-                            top = statusBarHeight() + 20.dp,
+                            top = statusBarHeight() + 8.dp,
                             start = 24.dp,
                             end = 24.dp,
                             bottom = 30.dp
                         )
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                    Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxHeight()
                     ) {
                         if (state.infoToShow == NONE) {
-                            TopIconButton(
-                                background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
-                                iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
-                                onClick = {
-                                    onAction(TryToggleFlashlight(true))
-                                }
-                            )
                             TopIconButton(
                                 background = SurfaceHigher,
                                 iconRes = R.drawable.ic_image_picker,
@@ -289,31 +286,97 @@ fun ScanScreen(
                                     onAction(PickImage)
                                 }
                             )
+                            TopIconButton(
+                                background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
+                                iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
+                                onClick = {
+                                    onAction(TryToggleFlashlight(true))
+                                }
+                            )
                         }
                     }
-                    Text(
-                        text = stringResource(R.string.point_your_camera),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = OnOverlay,
-                    )
-                }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+                        Text(
+                            text = stringResource(R.string.point_your_camera),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = OnOverlay,
+                        )
 
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+                        Spacer(Modifier.height(24.dp))
+
+                        if (state.infoToShow != LOADING) {
+                            ScanFrame(
+                                modifier = Modifier
+                                    .weight(1f).aspectRatio(1f)
+                            )
+                        }
+                    }
+                    Box(modifier = Modifier.fillMaxHeight())
+                }
+            } else {
+                Column(
+                    modifier = backModifier
                 ) {
-                    if (state.infoToShow != LOADING) {
-                        ScanFrame(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .aspectRatio(1f)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(
+                                top = statusBarHeight() + 20.dp,
+                                start = 24.dp,
+                                end = 24.dp,
+                                bottom = 30.dp
+                            )
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (state.infoToShow == NONE) {
+                                TopIconButton(
+                                    background = if (state.isFlashOn) MaterialTheme.colorScheme.primary else SurfaceHigher,
+                                    iconRes = if (state.isFlashOn) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on,
+                                    onClick = {
+                                        onAction(TryToggleFlashlight(true))
+                                    }
+                                )
+                                TopIconButton(
+                                    background = SurfaceHigher,
+                                    iconRes = R.drawable.ic_image_picker,
+                                    onClick = {
+                                        onAction(PickImage)
+                                    }
+                                )
+                            }
+                        }
+                        Text(
+                            text = stringResource(R.string.point_your_camera),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = OnOverlay,
                         )
                     }
-                }
 
-                Box(modifier = Modifier.weight(1f).fillMaxWidth())
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        if (state.infoToShow != LOADING) {
+                            ScanFrame(
+                                modifier = Modifier.fillMaxHeight().aspectRatio(1f)
+                            )
+                        }
+                    }
+
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth())
+                }
             }
         }
     }
