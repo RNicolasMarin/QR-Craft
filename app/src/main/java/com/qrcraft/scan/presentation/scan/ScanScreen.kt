@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -416,6 +418,7 @@ fun QRCodeScanner(
     isScanning: () -> Boolean,
     onAction: (ScanAction) -> Unit,
 ) {
+    val orientation = LocalConfiguration.current.orientation
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -435,105 +438,111 @@ fun QRCodeScanner(
 
     when (state.permissionGranted) {
         true -> {
-            AndroidView(
-                factory = { ctx ->
-                    val previewView = PreviewView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                    }
-
-                    val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
-                    }
-
-                    val barcodeScanner = BarcodeScanning.getClient(
-                        BarcodeScannerOptions.Builder()
-                            .setBarcodeFormats(
-                                Barcode.FORMAT_QR_CODE,
-                                Barcode.FORMAT_AZTEC
+            key(orientation) {
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
                             )
+                        }
+
+                        val preview = Preview.Builder().build().also {
+                            it.surfaceProvider = previewView.surfaceProvider
+                        }
+
+                        val barcodeScanner = BarcodeScanning.getClient(
+                            BarcodeScannerOptions.Builder()
+                                .setBarcodeFormats(
+                                    Barcode.FORMAT_QR_CODE,
+                                    Barcode.FORMAT_AZTEC
+                                )
+                                .build()
+                        )
+
+                        val analysisUseCase = ImageAnalysis.Builder()
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                             .build()
-                    )
 
-                    val analysisUseCase = ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
+                        analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
+                            if (!isScanning()) {
+                                imageProxy.close()
+                                return@setAnalyzer
+                            }
 
-                    analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
-                        if (!isScanning()) {
-                            imageProxy.close()
-                            return@setAnalyzer
-                        }
+                            val now = System.currentTimeMillis()
+                            if (now - lastTime < scanInterval) {
+                                imageProxy.close()
+                                return@setAnalyzer
+                            }
+                            lastTime = now
 
-                        val now = System.currentTimeMillis()
-                        if (now - lastTime < scanInterval) {
-                            imageProxy.close()
-                            return@setAnalyzer
-                        }
-                        lastTime = now
+                            val mediaImage = imageProxy.image
+                            if (mediaImage != null) {
+                                // Camera image dimensions
+                                val imageWidth = mediaImage.width
+                                val imageHeight = mediaImage.height
 
-                        val mediaImage = imageProxy.image
-                        if (mediaImage != null) {
-                            // Camera image dimensions
-                            val imageWidth = mediaImage.width
-                            val imageHeight = mediaImage.height
+                                // Square side (1/3 of screen height) and centered in camera image
+                                val side = imageHeight / 3
+                                val left = (imageWidth - side) / 2
+                                val top = (imageHeight - side) / 2
 
-                            // Square side (1/3 of screen height) and centered in camera image
-                            val side = imageHeight / 3
-                            val left = (imageWidth - side) / 2
-                            val top = (imageHeight - side) / 2
+                                // Convert MediaImage to bitmap
+                                val bitmap = mediaImage.yuvToRgb()
 
-                            // Convert MediaImage to bitmap
-                            val bitmap = mediaImage.yuvToRgb()
+                                Log.d("ScanningInfo", "imageHeight: $imageHeight, imageWidth: $imageWidth, left: $left, top: $top, side: $side, imageProxy.imageInfo.rotationDegrees: ${imageProxy.imageInfo.rotationDegrees}")
 
-                            // Crop center square
-                            val croppedBitmap = Bitmap.createBitmap(bitmap, left, top, side, side)
+                                // Crop center square
+                                val croppedBitmap = Bitmap.createBitmap(bitmap, left, top, side, side)
 
-                            val inputImage = InputImage.fromBitmap(croppedBitmap, 0)
-                            barcodeScanner.process(inputImage)
-                                .addOnSuccessListener { barcodes ->
-                                    if (barcodes.isNotEmpty()) {
-                                        onAction(ScannerLoading)
+                                val inputImage = InputImage.fromBitmap(croppedBitmap, imageProxy.imageInfo.rotationDegrees)
+
+                                barcodeScanner.process(inputImage)
+                                    .addOnSuccessListener { barcodes ->
+                                        if (barcodes.isNotEmpty()) {
+                                            onAction(ScannerLoading)
+                                        }
+
+                                        barcodes.firstOrNull()?.rawValue?.let { value ->
+                                            onAction(ScannerSuccess(value))
+                                        }
                                     }
-
-                                    barcodes.firstOrNull()?.rawValue?.let { value ->
-                                        onAction(ScannerSuccess(value))
+                                    .addOnCanceledListener {
+                                        onAction(ScannerQrNotFound)
                                     }
-                                }
-                                .addOnCanceledListener {
-                                    onAction(ScannerQrNotFound)
-                                }
-                                .addOnFailureListener {
-                                    onAction(ScannerQrNotFound)
-                                }
-                                .addOnCompleteListener {
-                                    imageProxy.close()
-                                }
-                        } else {
-                            imageProxy.close()
-                            onAction(ScannerQrNotFound)
+                                    .addOnFailureListener {
+                                        onAction(ScannerQrNotFound)
+                                    }
+                                    .addOnCompleteListener {
+                                        imageProxy.close()
+                                    }
+                            } else {
+                                imageProxy.close()
+                                onAction(ScannerQrNotFound)
+                            }
                         }
-                    }
 
-                    cameraProviderFuture.get().unbindAll()
-                    camera = cameraProviderFuture.get().bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        analysisUseCase
-                    )
+                        cameraProviderFuture.get().unbindAll()
+                        camera = cameraProviderFuture.get().bindToLifecycle(
+                            lifecycleOwner,
+                            CameraSelector.DEFAULT_BACK_CAMERA,
+                            preview,
+                            analysisUseCase
+                        )
 
-                    camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
+                        camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
 
-                    previewView
-                },
-                update = {
-                    camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
-                },
-                modifier = modifier
-            )
+                        previewView
+                    },
+                    update = {
+                        camera?.checkIfCanTurnOnOfOff(isTrying = state.isCheckingAvailable, isOn = state.isFlashOn, onAction = onAction)
+                    },
+                    modifier = modifier
+                )
+            }
+
         }
         false -> {
             Box(
