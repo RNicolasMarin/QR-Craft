@@ -8,6 +8,7 @@ data class Dimens(
     val scanResult: DimensScanResult,
     val createQr: DimensCreateQr,
     val dataEntry: DimensDataEntry,
+    val history: DimensHistory,
     val topBar: DimensTopBar,
     val bottomBar: DimensBottomBar
 )
@@ -22,6 +23,13 @@ data class DimensScanResult(
 
 data class DimensCreateQr(
     val columnsAmount: Int
+)
+
+data class DimensHistory(
+    val columnsAmount: Int,
+    val startPadding: Dp,
+    val endPadding: Dp,
+    val bottomSpace: Dp,
 )
 
 data class DimensDataEntry(
@@ -78,6 +86,12 @@ val dimensPhonePortrait = Dimens(
     dataEntry = DimensDataEntry(
         spaceTopBarAndContent = 0.dp,
         padding = 16.dp
+    ),
+    history = DimensHistory(
+        columnsAmount = 1,
+        startPadding = 16.dp,
+        endPadding = 16.dp,
+        bottomSpace = 64.dp
     )
 )
 
@@ -110,5 +124,49 @@ val dimensTabletPortrait = Dimens(
     dataEntry = DimensDataEntry(
         spaceTopBarAndContent = 12.dp,
         padding = 24.dp
+    ),
+    history = DimensHistory(
+        columnsAmount = 2,
+        startPadding = 24.dp,
+        endPadding = 24.dp,
+        bottomSpace = 72.dp
+    )
+)
+
+val dimensLandscape = Dimens(
+    topBar = DimensTopBar(
+        paddingStart = 16.dp,
+        paddingEnd = 16.dp,
+        spaceEnd = 24.dp
+    ),
+    bottomBar = DimensBottomBar(
+        padding = 4.dp,
+        spaceBetween = 80.dp,
+        scanOuter = 64.dp,
+    ),
+    scan = DimensScan(
+        iconButtonSize = 44.dp
+    ),
+    scanResult = DimensScanResult(
+        scannedContent = DimensScanResultScannedContent(
+            qr = 160.dp,
+            paddingStart = 16.dp,
+            paddingEnd = 16.dp,
+            paddingTop = 20.dp,
+            paddingBottom = 16.dp
+        )
+    ),
+    createQr = DimensCreateQr(
+        columnsAmount = 2
+    ),
+    dataEntry = DimensDataEntry(
+        spaceTopBarAndContent = 0.dp,
+        padding = 16.dp
+    ),
+    history = DimensHistory(
+        columnsAmount = 2,
+        startPadding = 8.dp,
+        endPadding = 64.dp,
+        bottomSpace = 0.dp
     )
 )

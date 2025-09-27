@@ -2,13 +2,13 @@ package com.qrcraft.history.presentation.scan_history
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +52,7 @@ import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.components.QrCraftBaseComponent
 import com.qrcraft.core.presentation.components.QrCodeTypeIcon
 import com.qrcraft.core.presentation.designsystem.Dimens
+import com.qrcraft.core.presentation.designsystem.DimensHistory
 import com.qrcraft.core.presentation.designsystem.Grey2
 import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.OnSurfaceDisabled
@@ -61,6 +63,7 @@ import com.qrcraft.core.presentation.formatTimestamp
 import com.qrcraft.create.presentation.create_qr.QrTypeUI
 import com.qrcraft.history.presentation.scan_history.ScanHistoryAction.*
 import com.qrcraft.scan.domain.QrCode
+import com.qrcraft.scan.domain.QrCodeType
 import com.qrcraft.scan.domain.QrCodeType.*
 import com.qrcraft.scan.domain.ScannedOrGenerated.*
 import com.qrcraft.scan.presentation.util.getFormattedContentHistory
@@ -259,22 +262,20 @@ fun ScanHistoryTabsAndContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        val listStateScanned = rememberLazyListState()
-        val listStateGenerated = rememberLazyListState()
+        val listStateScanned = rememberLazyGridState()
+        val listStateGenerated = rememberLazyGridState()
 
-        Crossfade(targetState = state.scannedOrGenerated) { tab ->
-            when (tab) {
-                SCANNED -> ScanHistoryList(
-                    qrCodes = state.qrCodesScanned,
-                    onAction = onAction,
-                    listState = listStateScanned
-                )
-                GENERATED -> ScanHistoryList(
-                    qrCodes = state.qrCodesGenerated,
-                    onAction = onAction,
-                    listState = listStateGenerated
-                )
-            }
+        when (state.scannedOrGenerated) {
+            SCANNED -> ScanHistoryList(
+                qrCodes = state.qrCodesScanned,
+                onAction = onAction,
+                listState = listStateScanned
+            )
+            GENERATED -> ScanHistoryList(
+                qrCodes = state.qrCodesGenerated,
+                onAction = onAction,
+                listState = listStateGenerated
+            )
         }
     }
 }
@@ -283,13 +284,14 @@ fun ScanHistoryTabsAndContent(
 fun ScanHistoryList(
     qrCodes: List<QrCode>,
     onAction: (ScanHistoryAction) -> Unit,
-    dimens: Dimens = MaterialTheme.dimen,
-    listState: LazyListState
+    listState: LazyGridState,
+    modifier: Modifier = Modifier,
+    dimens: DimensHistory = MaterialTheme.dimen.history
 ) {
     if (qrCodes.isEmpty()) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         ) {
             Text(
                 text = stringResource(R.string.scan_history_empty),
@@ -298,12 +300,14 @@ fun ScanHistoryList(
             )
         }
     } else {
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(dimens.columnsAmount),
             state = listState,
+            modifier = modifier
+                .padding(start = dimens.startPadding, end = dimens.endPadding),
+            contentPadding = PaddingValues(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .widthIn(0.dp, 552.dp)
-                .padding(start = dimens.topBar.paddingStart, end = dimens.topBar.paddingEnd)
         ) {
             items(
                 items = qrCodes,
@@ -316,7 +320,7 @@ fun ScanHistoryList(
                 )
             }
             item {
-                Spacer(modifier = Modifier.height(dimens.bottomBar.scanOuter))
+                Spacer(modifier = Modifier.height(dimens.bottomSpace))
             }
         }
     }
@@ -433,12 +437,26 @@ fun ScanHistoryItem(
     }
 }
 
+val qrCodes = (1..50).map {
+    QrCode(
+        id = it,
+        rawContent = "Qr Code $it",
+        title = "Text $it",
+        type = QrCodeType.Text,
+        createdAt = 1234567,
+        scannedOrGenerated = SCANNED,
+        isFavourite = it % 2 == 0
+    )
+}
+
 @MultiDevicePreview
 @Composable
 private fun ScanHistoryScreenPreview() {
     QRCraftTheme {
         ScanHistoryScreen(
-            state = ScanHistoryState(),
+            state = ScanHistoryState(
+                qrCodesScanned = qrCodes
+            ),
             onAction = {
 
             }

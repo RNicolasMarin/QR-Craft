@@ -40,7 +40,7 @@ fun QRCraftTheme(
     val dimens = when (screenConfiguration) {
         PHONE_PORTRAIT -> dimensPhonePortrait
         TABLET_PORTRAIT -> dimensTabletPortrait
-        LANDSCAPE -> dimensPhonePortrait//check again
+        LANDSCAPE -> dimensLandscape
     }
 
     ProvideDimens(dimens) {

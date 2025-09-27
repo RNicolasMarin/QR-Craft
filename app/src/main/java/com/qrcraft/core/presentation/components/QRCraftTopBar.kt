@@ -44,7 +44,7 @@ fun QRCraftTopBar(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
         ) {
             if (config.backIconRes != null) {
                 Icon(
