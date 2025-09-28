@@ -1,6 +1,7 @@
 package com.qrcraft.scan.presentation.scan_result_preview
 
 import android.graphics.Bitmap
+import com.qrcraft.scan.domain.QrTypeTextStateDomain
 
 sealed interface ScanResultPreviewAction {
 
@@ -36,4 +37,7 @@ sealed interface ScanResultPreviewAction {
 
     data object ClearMessageSnackBar: ScanResultPreviewAction
 
+    data class UpdateTextState(
+        val textState: QrTypeTextStateDomain
+    ): ScanResultPreviewAction
 }

@@ -63,6 +63,12 @@ class ScanResultPreviewViewModel(
                 )
             }
 
+            is UpdateTextState -> {
+                state = state.copy(
+                    textState = action.textState
+                )
+            }
+
             else -> Unit
         }
     }

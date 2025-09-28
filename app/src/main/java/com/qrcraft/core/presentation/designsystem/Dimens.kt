@@ -150,8 +150,8 @@ val dimensLandscape = Dimens(
     scanResult = DimensScanResult(
         scannedContent = DimensScanResultScannedContent(
             qr = 160.dp,
-            paddingStart = 16.dp,
-            paddingEnd = 16.dp,
+            paddingStart = 8.dp,
+            paddingEnd = 8.dp,
             paddingTop = 20.dp,
             paddingBottom = 16.dp
         )
