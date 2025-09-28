@@ -22,7 +22,10 @@ data class DimensScanResult(
 )
 
 data class DimensCreateQr(
-    val columnsAmount: Int
+    val columnsAmount: Int,
+    val startPadding: Dp,
+    val endPadding: Dp,
+    val bottomSpace: Dp,
 )
 
 data class DimensHistory(
@@ -81,7 +84,10 @@ val dimensPhonePortrait = Dimens(
         )
     ),
     createQr = DimensCreateQr(
-        columnsAmount = 2
+        columnsAmount = 2,
+        startPadding = 0.dp,
+        endPadding = 0.dp,
+        bottomSpace = 64.dp
     ),
     dataEntry = DimensDataEntry(
         spaceTopBarAndContent = 0.dp,
@@ -119,7 +125,10 @@ val dimensTabletPortrait = Dimens(
         )
     ),
     createQr = DimensCreateQr(
-        columnsAmount = 3
+        columnsAmount = 3,
+        startPadding = 0.dp,
+        endPadding = 0.dp,
+        bottomSpace = 72.dp
     ),
     dataEntry = DimensDataEntry(
         spaceTopBarAndContent = 12.dp,
@@ -157,7 +166,10 @@ val dimensLandscape = Dimens(
         )
     ),
     createQr = DimensCreateQr(
-        columnsAmount = 2
+        columnsAmount = 3,
+        startPadding = 8.dp,
+        endPadding = 64.dp,
+        bottomSpace = 0.dp
     ),
     dataEntry = DimensDataEntry(
         spaceTopBarAndContent = 0.dp,

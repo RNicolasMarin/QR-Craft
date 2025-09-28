@@ -315,8 +315,7 @@ fun ScanHistoryList(
             ) { qrCode ->
                 ScanHistoryItem(
                     qrCode = qrCode,
-                    onAction = onAction,
-                    modifier = Modifier
+                    onAction = onAction
                 )
             }
             item {

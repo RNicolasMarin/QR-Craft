@@ -3,16 +3,17 @@ package com.qrcraft.create.presentation.create_qr
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -56,9 +57,6 @@ fun CreateQrScreen(
     onAction: (CreateQrAction) -> Unit,
     dimens: DimensTopBar = MaterialTheme.dimen.topBar
 ) {
-
-    val scrollState = rememberScrollState()
-
     QrCraftBaseComponent(
         color = MaterialTheme.colorScheme.surface,
         topBarConfig = QRCraftTopBarConfig(
@@ -72,7 +70,6 @@ fun CreateQrScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = dimens.paddingStart, end = dimens.paddingEnd, bottom = 16.dp)
-                .verticalScroll(scrollState),
         ) {
             Spacer(Modifier.height(2.dp))
 
@@ -91,29 +88,34 @@ fun CreateQrScreenGrid(
 ) {
     val items = QrTypeUI.entries.toList()
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
+    val listState = rememberLazyGridState()
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(dimens.columnsAmount),
+        state = listState,
+        modifier = modifier.fillMaxWidth()
+            .padding(start = dimens.startPadding, end = dimens.endPadding),
+        contentPadding = PaddingValues(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items.chunked(dimens.columnsAmount).forEach { rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                rowItems.forEach { item ->
-                    CreateQrScreenGridCell(
-                        item = item,
-                        onAction = onAction
-                    )
-                }
-            }
-            Spacer(Modifier.height(8.dp))
+        items(
+            items = items,
+            key = { qrType -> qrType.name }
+        ) { qrType ->
+            CreateQrScreenGridCell(
+                item = qrType,
+                onAction = onAction
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(dimens.bottomSpace))
         }
     }
 }
 
 @Composable
-fun RowScope.CreateQrScreenGridCell(
+fun CreateQrScreenGridCell(
     item: QrTypeUI,
     onAction: (CreateQrAction) -> Unit,
     modifier: Modifier = Modifier
@@ -123,7 +125,6 @@ fun RowScope.CreateQrScreenGridCell(
         colors = CardDefaults.cardColors(containerColor = SurfaceHigher),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = modifier
-            .weight(1f)
             .clickable(onClick = {
                 onAction(OnDataEntry(item.ordinal))
             })
