@@ -620,7 +620,7 @@ private fun LoginScreenPreviewLink() {
             titleRes = R.string.preview,
             state = ScanResultPreviewState(
                 qrCode = QrCode(
-                    rawContent = "http://https://pl-coding.mymemberspot.io",
+                    rawContent = "https://pl-coding.mymemberspot.io",
                     type = Link
                 )
             ),

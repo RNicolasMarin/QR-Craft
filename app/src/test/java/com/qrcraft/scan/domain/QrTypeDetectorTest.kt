@@ -16,7 +16,7 @@ class QrTypeDetectorTest {
 
     @Test
     fun `is Link 1` () {
-        val content = "http://https://pl-coding.mymemberspot.io"
+        val content = "https://pl-coding.mymemberspot.io"
         val result = qrTypeDetector.getQrCodeType(content)
         assertThat(result).isEqualTo(Link)
     }

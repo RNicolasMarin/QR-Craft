@@ -18,7 +18,7 @@ class DataEntryValidatorTest {
     @Test
     fun `valid Link 1`() {
         val content = QrCode(
-            rawContent = "http://https://pl-coding.mymemberspot.io",
+            rawContent = "https://pl-coding.mymemberspot.io",
             type = Link
         )
         val result = dataEntryValidator.isValidContent(content)

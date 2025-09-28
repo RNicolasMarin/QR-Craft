@@ -343,7 +343,7 @@ private fun DataEntryScreenPreviewLink() {
             qrTypeUI = LINK,
             state = DataEntryState(
                 qrCode = QrCode(
-                    rawContent = "http://https://pl-coding.mymemberspot.io",
+                    rawContent = "https://pl-coding.mymemberspot.io",
                     type = Link
                 )
             ),
