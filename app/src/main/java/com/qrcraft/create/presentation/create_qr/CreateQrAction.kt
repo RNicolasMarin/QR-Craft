@@ -5,4 +5,9 @@ sealed interface CreateQrAction {
     data class OnDataEntry(
         val qrTypeOrdinal: Int
     ): CreateQrAction
+
+    data object OnHistory: CreateQrAction
+
+    data object OnScanQr: CreateQrAction
+
 }

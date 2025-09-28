@@ -28,15 +28,13 @@ fun NavigationRoot(
                         ScanResult(
                             qrCodeId = qrCodeId
                         )
-                    ) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    )
                 },
                 onCreateQr = {
-                    navController.navigate(CreateQR)
+                    navController.navigateAndRemove(Scan, CreateQR)
                 },
                 onScanHistory = {
-                    navController.navigate(ScanHistory)
+                    navController.navigateAndRemove(Scan, ScanHistory)
                 }
             )
         }
@@ -56,6 +54,12 @@ fun NavigationRoot(
             CreateQrScreenRoot(
                 onDataEntry = { qrTypeOrdinal ->
                     navController.navigate(DataEntry(qrTypeOrdinal))
+                },
+                onHistory = {
+                    navController.navigateAndRemove(CreateQR, ScanHistory)
+                },
+                onScanQr = {
+                    navController.navigateAndRemove(CreateQR, Scan)
                 }
             )
         }
@@ -93,8 +97,23 @@ fun NavigationRoot(
                             qrCodeId = qrCodeId
                         )
                     )
+                },
+                onCreateQr = {
+                    navController.navigateAndRemove(ScanHistory, CreateQR)
+                },
+                onScanQr = {
+                    navController.navigateAndRemove(ScanHistory, Scan)
                 }
             )
         }
+    }
+}
+
+fun NavHostController.navigateAndRemove(
+    current: Screen,
+    moveTo: Screen
+) {
+    navigate(moveTo) {
+        popUpTo(current) { inclusive = true }
     }
 }

@@ -99,7 +99,9 @@ fun QRCraftBottomNavigationBar(
         }
 
         IconButton(
-            onClick = {},
+            onClick = {
+                onAction(BottomNavigationBarOnScan)
+            },
             modifier = modifier
                 .size(dimens.scanOuter)
                 .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(100.dp))

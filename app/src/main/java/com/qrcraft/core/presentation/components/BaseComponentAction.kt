@@ -6,11 +6,13 @@ sealed class BaseComponentAction {
 
     data object TopBarOnRightClicked: BaseComponentAction()
 
+    data object BottomNavigationBarOnScan: BaseComponentAction()
+
     data object BottomNavigationBarOnCreate: BaseComponentAction()
 
-    data object SnackBarClearMessage: BaseComponentAction()
-
     data object BottomNavigationBarOnHistory: BaseComponentAction()
+
+    data object SnackBarClearMessage: BaseComponentAction()
 
     data object DialogOnClosed: BaseComponentAction()
 

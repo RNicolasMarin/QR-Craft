@@ -26,4 +26,8 @@ sealed interface ScanHistoryAction {
         val qrCode: QrCode
     ): ScanHistoryAction
 
+    data object OnScanQr: ScanHistoryAction
+
+    data object OnCreateQr: ScanHistoryAction
+
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.components.QrCraftBaseComponent
@@ -35,15 +36,19 @@ import com.qrcraft.core.presentation.designsystem.MultiDevicePreview
 import com.qrcraft.core.presentation.designsystem.QRCraftTheme
 import com.qrcraft.core.presentation.designsystem.SurfaceHigher
 import com.qrcraft.core.presentation.designsystem.dimen
-import com.qrcraft.create.presentation.create_qr.CreateQrAction.OnDataEntry
+import com.qrcraft.create.presentation.create_qr.CreateQrAction.*
 
 @Composable
 fun CreateQrScreenRoot(
     onDataEntry: (Int) -> Unit,
+    onHistory: () -> Unit,
+    onScanQr: () -> Unit,
 ) {
     CreateQrScreen(
         onAction = { action ->
             when (action) {
+                OnHistory -> onHistory()
+                OnScanQr -> onScanQr()
                 is OnDataEntry -> {
                     onDataEntry(action.qrTypeOrdinal)
                 }
@@ -64,7 +69,14 @@ fun CreateQrScreen(
             color = MaterialTheme.colorScheme.onSurface,
             backIconRes = null
         ),
-        selectedOption = CREATE
+        selectedOption = CREATE,
+        onAction = {
+            when (it) {
+                BottomNavigationBarOnHistory -> onAction(OnHistory)
+                BottomNavigationBarOnScan -> onAction(OnScanQr)
+                else -> Unit
+            }
+        }
     ) {
         Column(
             modifier = Modifier

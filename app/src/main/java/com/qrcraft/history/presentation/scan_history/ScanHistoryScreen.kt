@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.qrcraft.R
+import com.qrcraft.core.presentation.components.BaseComponentAction.*
 import com.qrcraft.core.presentation.components.BottomNavigationBarOption.*
 import com.qrcraft.core.presentation.components.QRCraftTopBarConfig
 import com.qrcraft.core.presentation.components.QrCraftBaseComponent
@@ -75,6 +76,8 @@ import kotlin.Int
 @Composable
 fun ScanHistoryScreenRoot(
     onGoToPreview: (Int) -> Unit,
+    onScanQr: () -> Unit,
+    onCreateQr: () -> Unit,
     viewModel: ScanHistoryViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -83,6 +86,8 @@ fun ScanHistoryScreenRoot(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
+                OnScanQr -> onScanQr()
+                OnCreateQr -> onCreateQr()
                 is GoToPreview -> onGoToPreview(action.qrCodeId)
                 is ShareContent -> {
                     context.shareContent(action.qrContent)
@@ -108,7 +113,14 @@ fun ScanHistoryScreen(
             backIconRes = null
         ),
         showBlur = true,
-        selectedOption = HISTORY
+        selectedOption = HISTORY,
+        onAction = {
+            when (it) {
+                BottomNavigationBarOnScan -> onAction(OnScanQr)
+                BottomNavigationBarOnCreate -> onAction(OnCreateQr)
+                else -> Unit
+            }
+        }
     ) {
         Column(
             modifier = Modifier

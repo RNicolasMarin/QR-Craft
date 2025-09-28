@@ -85,7 +85,7 @@ class ScanHistoryViewModel(
                     )
                 }
             }
-            else -> Unit
+            is GoToPreview, is ShareContent, OnCreateQr, OnScanQr -> Unit
         }
     }
 }
