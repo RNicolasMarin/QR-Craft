@@ -152,6 +152,7 @@ fun ScanScreenRoot(
             ImagePickedResult.Idle -> Unit
             ImagePickedResult.Error -> {
                 viewModel.onAction(ScannerQrNotFound)
+                imagePickedResult = ImagePickedResult.Idle
             }
             is ImagePickedResult.Success -> {
                 viewModel.onAction(ScannerLoading)
@@ -166,6 +167,12 @@ fun ScanScreenRoot(
                         bitmap = bitmap,
                         callErrorOnNoValue = true,
                         onAction = {
+                            when (it) {
+                                ScannerQrNotFound -> {
+                                    imagePickedResult = ImagePickedResult.Idle
+                                }
+                                else -> Unit
+                            }
                             viewModel.onAction(it)
                         }
                     )
