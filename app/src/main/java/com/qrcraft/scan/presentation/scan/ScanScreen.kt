@@ -68,6 +68,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.tasks.Task
+import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -112,13 +113,12 @@ fun ScanScreenRoot(
     viewModel: ScanViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as Activity
 
     LaunchedEffect(true) {
         viewModel.onAction(UpdateGrantedInitially(context.hasCameraPermission()))
     }
 
-    var snackBarMessage by remember { mutableStateOf<String?>(null) }
+    val activity = context as Activity
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -133,13 +133,16 @@ fun ScanScreenRoot(
         )
     }
 
-    val options = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_QR_CODE,
-            Barcode.FORMAT_AZTEC
+    val scanner = remember {
+        BarcodeScanning.getClient(
+            BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(
+                    Barcode.FORMAT_QR_CODE,
+                    Barcode.FORMAT_AZTEC
+                )
+                .build()
         )
-        .build()
-    val scanner = remember { BarcodeScanning.getClient(options) }
+    }
 
     var imagePickedResult by remember { mutableStateOf<ImagePickedResult>(ImagePickedResult.Idle) }
 
@@ -158,17 +161,14 @@ fun ScanScreenRoot(
                         viewModel.onAction(ScannerQrNotFound)
                         return@withContext
                     }
-                    val image = InputImage.fromBitmap(bitmap, 0)
 
-                    try {
-                        val barcodes = scanner.process(image).awaitResult()
-                        val value = barcodes.firstOrNull()?.rawValue
-                        val action = if (value != null) ScannerSuccess(value) else ScannerQrNotFound
-                        viewModel.onAction(action)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        viewModel.onAction(ScannerQrNotFound)
-                    }
+                    scanner.detectQrCodes(
+                        bitmap = bitmap,
+                        callErrorOnNoValue = true,
+                        onAction = {
+                            viewModel.onAction(it)
+                        }
+                    )
                 }
             }
         }
@@ -177,6 +177,8 @@ fun ScanScreenRoot(
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imagePickedResult = if (uri != null) ImagePickedResult.Success(uri) else ImagePickedResult.Error
     }
+
+    var snackBarMessage by remember { mutableStateOf<String?>(null) }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -195,6 +197,7 @@ fun ScanScreenRoot(
     }
 
     ScanScreen(
+        scanner = scanner,
         snackBarMessage = snackBarMessage,
         state = viewModel.state,
         isScanning = viewModel.state::isScanning,
@@ -217,6 +220,7 @@ fun ScanScreenRoot(
 
 @Composable
 fun ScanScreen(
+    scanner: BarcodeScanner,
     snackBarMessage: String?,
     state: ScanState,
     isScanning: () -> Boolean,
@@ -253,17 +257,18 @@ fun ScanScreen(
         Box(Modifier.fillMaxSize()) {
             //Camera
             QRCodeScanner(
+                scanner = scanner,
                 state = state,
                 isScanning = isScanning,
                 modifier = Modifier.fillMaxSize(),
                 onAction = onAction
             )
 
-
             //Flashlight, Image picker, Frame, label
-            val backModifier =  Modifier
+            val backModifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f))
+
             if (screenConfiguration == LANDSCAPE) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -414,18 +419,19 @@ const val scanInterval = 1000L
 @Composable
 fun QRCodeScanner(
     modifier: Modifier = Modifier,
+    scanner: BarcodeScanner,
     state: ScanState,
     isScanning: () -> Boolean,
     onAction: (ScanAction) -> Unit,
 ) {
-    val orientation = LocalConfiguration.current.orientation
+
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
     var lastTime by remember { mutableLongStateOf(0L) }
     var camera by remember { mutableStateOf<Camera?>(null) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(
             LifecycleEventObserver { _, event ->
@@ -436,6 +442,8 @@ fun QRCodeScanner(
         )
     }
 
+
+    val orientation = LocalConfiguration.current.orientation
     when (state.permissionGranted) {
         true -> {
             key(orientation) {
@@ -451,15 +459,6 @@ fun QRCodeScanner(
                         val preview = Preview.Builder().build().also {
                             it.surfaceProvider = previewView.surfaceProvider
                         }
-
-                        val barcodeScanner = BarcodeScanning.getClient(
-                            BarcodeScannerOptions.Builder()
-                                .setBarcodeFormats(
-                                    Barcode.FORMAT_QR_CODE,
-                                    Barcode.FORMAT_AZTEC
-                                )
-                                .build()
-                        )
 
                         val analysisUseCase = ImageAnalysis.Builder()
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -497,27 +496,14 @@ fun QRCodeScanner(
                                 // Crop center square
                                 val croppedBitmap = Bitmap.createBitmap(bitmap, left, top, side, side)
 
-                                val inputImage = InputImage.fromBitmap(croppedBitmap, imageProxy.imageInfo.rotationDegrees)
-
-                                barcodeScanner.process(inputImage)
-                                    .addOnSuccessListener { barcodes ->
-                                        if (barcodes.isNotEmpty()) {
-                                            onAction(ScannerLoading)
-                                        }
-
-                                        barcodes.firstOrNull()?.rawValue?.let { value ->
-                                            onAction(ScannerSuccess(value))
-                                        }
-                                    }
-                                    .addOnCanceledListener {
-                                        onAction(ScannerQrNotFound)
-                                    }
-                                    .addOnFailureListener {
-                                        onAction(ScannerQrNotFound)
-                                    }
-                                    .addOnCompleteListener {
+                                scanner.detectQrCodes(
+                                    bitmap = croppedBitmap,
+                                    rotationDegree = imageProxy.imageInfo.rotationDegrees,
+                                    onAction = onAction,
+                                    onComplete = {
                                         imageProxy.close()
                                     }
+                                )
                             } else {
                                 imageProxy.close()
                                 onAction(ScannerQrNotFound)
@@ -554,6 +540,40 @@ fun QRCodeScanner(
         }
         null -> {}
     }
+}
+
+fun BarcodeScanner.detectQrCodes(
+    bitmap: Bitmap,
+    rotationDegree: Int = 0,
+    onAction: (ScanAction) -> Unit,
+    callErrorOnNoValue: Boolean = false,
+    onComplete: () -> Unit = {}
+) {
+    val image = InputImage.fromBitmap(bitmap, rotationDegree)
+
+    process(image)
+        .addOnSuccessListener { barcodes ->
+            if (barcodes.isNotEmpty()) {
+                onAction(ScannerLoading)
+            }
+
+            barcodes.firstOrNull()?.rawValue?.let { value ->
+                onAction(ScannerSuccess(value))
+            } ?: run {
+                if (callErrorOnNoValue) {
+                    onAction(ScannerQrNotFound)
+                }
+            }
+        }
+        .addOnCanceledListener {
+            onAction(ScannerQrNotFound)
+        }
+        .addOnFailureListener {
+            onAction(ScannerQrNotFound)
+        }
+        .addOnCompleteListener {
+            onComplete()
+        }
 }
 
 fun Camera.checkIfCanTurnOnOfOff(
